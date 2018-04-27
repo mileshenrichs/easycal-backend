@@ -1,20 +1,36 @@
 package models;
 
-import org.joda.time.LocalDate;
+import javax.persistence.*;
+
+import java.util.Date;
 
 /**
  * A simple object containing a calorie count and a day
  */
+@Entity
+@Table(name = "exercise")
 public class Exercise {
-    private int id;
-    private User user;
-    private int caloriesBurned;
-    private LocalDate day;
 
-    public Exercise(int id, User user, int caloriesBurned, LocalDate day) {
+    @Id
+    @GeneratedValue
+    private int id;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @Column(name = "calories_burned")
+    private int caloriesBurned;
+
+    @Temporal(TemporalType.DATE)
+    private Date day;
+
+    public Exercise(int id, User user, int caloriesBurned, Date day) {
         this.id = id;
         this.user = user;
         this.caloriesBurned = caloriesBurned;
         this.day = day;
     }
+
+    public Exercise() {}
 }

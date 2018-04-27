@@ -1,20 +1,41 @@
 package models;
 
+import javax.persistence.*;
+import java.util.List;
+
 /**
  * Represents a food item, which can be consumed by a user
  */
+@Entity
+@Table(name = "food_item")
 public class FoodItem {
-    private int id;
+
+    @Id
+    private String id;
+
     private String name;
+
     private double calories;
+
     private double carbs;
+
     private double fat;
+
     private double protein;
+
     private double fiber;
+
     private double sugar;
+
     private double sodium;
 
-    public FoodItem(int id, String name, double calories, double carbs, double fat, double protein,
+    @OneToMany(mappedBy = "foodItem")
+    private List<Consumption> consumptions;
+
+    @OneToMany(mappedBy = "foodItem")
+    private List<ServingSize> servingSizes;
+
+    public FoodItem(String id, String name, double calories, double carbs, double fat, double protein,
                     double fiber, double sugar, double sodium) {
         this.id = id;
         this.name = name;
@@ -26,4 +47,6 @@ public class FoodItem {
         this.sugar = sugar;
         this.sodium = sodium;
     }
+
+    public FoodItem() {}
 }

@@ -13,3 +13,4 @@ server.pid
 *.eml
 /dist/
 .cache
+*.iws
