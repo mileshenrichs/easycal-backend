@@ -13,28 +13,28 @@ public class Consumption {
 
     @Id
     @GeneratedValue
-    private int id;
+    public int id;
 
     @JoinColumn(name = "user_id")
     @ManyToOne
-    private User user;
+    public User user;
 
     @JoinColumn(name = "food_item_id")
     @ManyToOne
-    private FoodItem foodItem;
+    public FoodItem foodItem;
 
     @JoinColumn(name = "serving_size_id")
     @ManyToOne
-    private ServingSize servingSize;
+    public ServingSize servingSize;
 
     @Column(name = "serving_quantity")
-    private double servingQuantity;
+    public double servingQuantity;
 
     @Enumerated(EnumType.ORDINAL)
-    private Meal meal;
+    public Meal meal;
 
     @Temporal(TemporalType.DATE)
-    private Date day;
+    public Date day;
 
     public Consumption(int id, User user, FoodItem foodItem, ServingSize servingSize,
                        double servingQuantity, Meal meal, Date day) {

@@ -1,7 +1,7 @@
 # Routes
 
 # API endpoints
-GET     /api/test                               EasyCal.test
+GET     /api/consumptions                       EasyCal.getConsumptions
 
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}

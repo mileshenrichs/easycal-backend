@@ -12,13 +12,13 @@ public class ServingLabel {
 
     @Id
     @GeneratedValue
-    private int id;
+    public int id;
 
     @Column(name = "label_value")
-    private String labelValue;
+    public String labelValue;
 
     @OneToMany(mappedBy = "label")
-    private List<ServingSize> servingSizes;
+    public List<ServingSize> servingSizes;
 
     public ServingLabel(int id, String labelValue) {
         this.id = id;

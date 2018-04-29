@@ -11,29 +11,29 @@ import java.util.List;
 public class FoodItem {
 
     @Id
-    private String id;
+    public String id;
 
-    private String name;
+    public String name;
 
-    private double calories;
+    public double calories;
 
-    private double carbs;
+    public double carbs;
 
-    private double fat;
+    public double fat;
 
-    private double protein;
+    public double protein;
 
-    private double fiber;
+    public double fiber;
 
-    private double sugar;
+    public double sugar;
 
-    private double sodium;
-
-    @OneToMany(mappedBy = "foodItem")
-    private List<Consumption> consumptions;
+    public double sodium;
 
     @OneToMany(mappedBy = "foodItem")
-    private List<ServingSize> servingSizes;
+    public List<Consumption> consumptions;
+
+    @OneToMany(mappedBy = "foodItem")
+    public List<ServingSize> servingSizes;
 
     public FoodItem(String id, String name, double calories, double carbs, double fat, double protein,
                     double fiber, double sugar, double sodium) {

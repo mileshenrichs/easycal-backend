@@ -12,20 +12,20 @@ public class ServingSize {
 
     @Id
     @GeneratedValue
-    private int id;
+    public int id;
 
     @JoinColumn(name = "food_item_id")
     @ManyToOne
-    private FoodItem foodItem;
+    public FoodItem foodItem;
 
     @JoinColumn(name = "label_id")
     @ManyToOne
-    private ServingLabel label;
+    public ServingLabel label;
 
-    private double ratio;
+    public double ratio;
 
     @OneToMany(mappedBy = "servingSize")
-    private List<Consumption> consumptions;
+    public List<Consumption> consumptions;
 
     public ServingSize(int id, FoodItem foodItem, ServingLabel label, double ratio) {
         this.id = id;
