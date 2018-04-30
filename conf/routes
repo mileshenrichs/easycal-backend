@@ -2,6 +2,7 @@
 
 # API endpoints
 GET     /api/consumptions                       EasyCal.getConsumptions
+DELETE  /api/consumptions/{consumptionId}       EasyCal.deleteConsumption
 
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}

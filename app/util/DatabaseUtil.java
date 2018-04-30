@@ -19,4 +19,13 @@ public class DatabaseUtil {
                 .getResultList();
     }
 
+    public static boolean deleteConsumption(int consumptionId) {
+        Consumption consumption = JPA.em().find(Consumption.class, consumptionId);
+        if(consumption != null) {
+            JPA.em().remove(consumption);
+            return true;
+        }
+        return false;
+    }
+
 }

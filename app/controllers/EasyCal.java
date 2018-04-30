@@ -5,6 +5,7 @@ import play.mvc.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import models.*;
 import util.DatabaseUtil;
@@ -53,7 +54,8 @@ public class EasyCal extends Controller {
 
                 // construct meal item JSON
                 JsonObjectBuilder item = Json.createObjectBuilder();
-                item.add("id", c.id)
+                item.add("consumptionId", c.id)
+                    .add("foodItemId", c.foodItem.id)
                     .add("name", c.foodItem.name)
                     .add("selectedServing",
                             Json.createObjectBuilder()
@@ -76,6 +78,11 @@ public class EasyCal extends Controller {
                             .add("items", items));
         }
         renderJSON(res.build().toString());
+    }
+
+    public static void deleteConsumption(int consumptionId) {
+        response.status = DatabaseUtil.deleteConsumption(consumptionId) ? 204 : 404;
+        renderText("");
     }
 
 }
