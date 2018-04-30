@@ -1,8 +1,10 @@
 package util;
 
 import models.Consumption;
+import models.ServingSize;
 import play.db.jpa.JPA;
 
+import javax.persistence.EntityManager;
 import java.util.*;
 
 /**
@@ -23,6 +25,18 @@ public class DatabaseUtil {
         Consumption consumption = JPA.em().find(Consumption.class, consumptionId);
         if(consumption != null) {
             JPA.em().remove(consumption);
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean updateConsumption(int consumptionId, int servingSizeId, double quantity) {
+        EntityManager em = JPA.em();
+        Consumption consumption = em.find(Consumption.class, consumptionId);
+        ServingSize servingSize = em.find(ServingSize.class, servingSizeId);
+        if(consumption != null && servingSize != null) {
+            consumption.servingSize = servingSize;
+            consumption.servingQuantity = quantity;
             return true;
         }
         return false;

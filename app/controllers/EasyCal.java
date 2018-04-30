@@ -1,11 +1,13 @@
 package controllers;
 
+import org.apache.commons.io.IOUtils;
+import org.json.JSONObject;
 import play.mvc.*;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 import models.*;
 import util.DatabaseUtil;
@@ -83,6 +85,24 @@ public class EasyCal extends Controller {
     public static void deleteConsumption(int consumptionId) {
         response.status = DatabaseUtil.deleteConsumption(consumptionId) ? 204 : 404;
         renderText("");
+    }
+
+    public static void updateConsumption(int consumptionId) {
+        try {
+            String reqBody = IOUtils.toString(request.body, "UTF-8");
+            JSONObject reqObj = new JSONObject(reqBody);
+            int servingSizeId = reqObj.getJSONObject("selectedServing")
+                    .getJSONObject("servingSize").getInt("id");
+            double quantity = reqObj.getJSONObject("selectedServing")
+                    .getDouble("quantity");
+            response.status =
+                    DatabaseUtil.updateConsumption(consumptionId, servingSizeId, quantity) ? 200 : 404;
+        } catch (IOException e) {
+            e.printStackTrace();
+            response.status = 404;
+        } finally {
+            renderText("");
+        }
     }
 
 }

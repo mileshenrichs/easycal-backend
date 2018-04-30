@@ -3,3 +3,4 @@
 require:
     - play
     - org.glassfish -> javax.json 1.1.2
+    - org.json -> json 20180130
