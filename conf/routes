@@ -4,6 +4,10 @@
 GET     /api/consumptions                       EasyCal.getConsumptions
 DELETE  /api/consumptions/{consumptionId}       EasyCal.deleteConsumption
 PUT     /api/consumptions/{consumptionId}       EasyCal.updateConsumption
+POST    /api/consumptions                       EasyCal.createNewConsumption
+
+GET     /api/foods                              EasyCal.searchFoods
+GET     /api/foods/{ndbno}                      EasyCal.getFoodDetails
 
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}

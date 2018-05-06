@@ -1,7 +1,6 @@
 package util;
 
-import models.Consumption;
-import models.ServingSize;
+import models.*;
 import play.db.jpa.JPA;
 
 import javax.persistence.EntityManager;
@@ -40,6 +39,30 @@ public class DatabaseUtil {
             return true;
         }
         return false;
+    }
+
+    public static FoodItem getFoodItem(String foodItemId) {
+        return JPA.em().find(FoodItem.class, foodItemId);
+    }
+
+    public static User getUser(int userId) {
+        return JPA.em().find(User.class, userId);
+    }
+
+    public static ServingSize getServingSize(int servingSizeId) {
+        return JPA.em().find(ServingSize.class, servingSizeId);
+    }
+
+    public static int findServingSizeId(FoodItem foodItem, String label) {
+        List<Integer> ids = JPA.em()
+                .createQuery("SELECT ss.id FROM ServingSize ss " +
+                        "WHERE ss.foodItem.id = :foodItemId " +
+                        "AND ss.label.labelValue = :labelValue", Integer.class)
+                .setParameter("foodItemId", foodItem.id).setParameter("labelValue", label).getResultList();
+        if(ids.size() > 0) {
+            return ids.get(0);
+        }
+        return -1;
     }
 
 }

@@ -35,10 +35,11 @@ public class FoodItem {
     @OneToMany(mappedBy = "foodItem")
     public List<ServingSize> servingSizes;
 
-    public FoodItem(String id, String name, double calories, double carbs, double fat, double protein,
+    public FoodItem(String id, String name, List<ServingSize> servingSizes, double calories, double carbs, double fat, double protein,
                     double fiber, double sugar, double sodium) {
         this.id = id;
         this.name = name;
+        this.servingSizes = servingSizes;
         this.calories = calories;
         this.carbs = carbs;
         this.fat = fat;
