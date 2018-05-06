@@ -1,5 +1,3 @@
-# Routes
-
 # API endpoints
 GET     /api/consumptions                       EasyCal.getConsumptions
 DELETE  /api/consumptions/{consumptionId}       EasyCal.deleteConsumption
@@ -8,6 +6,9 @@ POST    /api/consumptions                       EasyCal.createNewConsumption
 
 GET     /api/foods                              EasyCal.searchFoods
 GET     /api/foods/{ndbno}                      EasyCal.getFoodDetails
+GET     /api/foods/user/{userId}                EasyCal.getUserCreatedFoods
+POST    /api/foods                              EasyCal.createFood
+DELETE  /api/foods/{id}                         EasyCal.deleteUserCreatedFood
 
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}

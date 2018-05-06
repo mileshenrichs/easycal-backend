@@ -22,7 +22,8 @@ public class DatabaseUtil {
 
     public static List<Consumption> getRecentConsumptions(int userId) {
         return JPA.em().createQuery("SELECT c FROM Consumption c " +
-                "WHERE c.user.id = :userId ORDER BY c.day DESC")
+                "WHERE c.id IN (SELECT MIN(c.id) FROM c GROUP BY c.foodItem)" +
+                "AND c.user.id = :userId ORDER BY c.day DESC")
                 .setParameter("userId", userId).getResultList();
     }
 
@@ -59,6 +60,17 @@ public class DatabaseUtil {
         return JPA.em().find(ServingSize.class, servingSizeId);
     }
 
+    public static ServingLabel getServingLabelByValue(String label) {
+        List<ServingLabel> servingLabels = JPA.em()
+                .createQuery("SELECT sl FROM ServingLabel sl " +
+                        "WHERE sl.labelValue = :labelValue")
+                .setParameter("labelValue", label).getResultList();
+        if(servingLabels.size() > 0) {
+            return servingLabels.get(0);
+        }
+        return null;
+    }
+
     public static int findServingSizeId(FoodItem foodItem, String label) {
         List<Integer> ids = JPA.em()
                 .createQuery("SELECT ss.id FROM ServingSize ss " +
@@ -69,6 +81,20 @@ public class DatabaseUtil {
             return ids.get(0);
         }
         return -1;
+    }
+
+    public static List<FoodItem> getUserFoodItems(int userId) {
+        User user = JPA.em().find(User.class, userId);
+        return user.createdFoods;
+    }
+
+    public static boolean deleteUserFoodItem(String foodItemId) {
+        FoodItem item = JPA.em().find(FoodItem.class, foodItemId);
+        if(item != null) {
+            JPA.em().remove(item);
+            return true;
+        }
+        return false;
     }
 
 }

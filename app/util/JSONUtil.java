@@ -61,13 +61,14 @@ public class JSONUtil {
         }
 
         // construct meal item JSON
+        int servingSizeId = f.servingSizes.size() > 0 ? f.servingSizes.get(0).id : 0;
         JsonObjectBuilder item = Json.createObjectBuilder();
         item.add("foodItemId", f.id)
                 .add("name", f.name)
                 .add("selectedServing",
                         Json.createObjectBuilder()
                                 .add("servingSize", Json.createObjectBuilder()
-                                        .add("id", 0) // temp id
+                                        .add("id", servingSizeId) // temp id
                                         .add("label", f.servingSizes.get(0).label.labelValue)
                                         .add("ratio", f.servingSizes.get(0).ratio))
                                 .add("quantity", 1))

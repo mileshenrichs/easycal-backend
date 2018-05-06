@@ -27,12 +27,5 @@ public class ServingSize {
     @OneToMany(mappedBy = "servingSize")
     public List<Consumption> consumptions;
 
-    public ServingSize(int id, FoodItem foodItem, ServingLabel label, double ratio) {
-        this.id = id;
-        this.foodItem = foodItem;
-        this.label = label;
-        this.ratio = ratio;
-    }
-
     public ServingSize() {}
 }

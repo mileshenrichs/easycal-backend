@@ -20,10 +20,5 @@ public class ServingLabel {
     @OneToMany(mappedBy = "label")
     public List<ServingSize> servingSizes;
 
-    public ServingLabel(int id, String labelValue) {
-        this.id = id;
-        this.labelValue = labelValue;
-    }
-
     public ServingLabel() {}
 }

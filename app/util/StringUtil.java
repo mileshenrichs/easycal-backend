@@ -27,4 +27,30 @@ public class StringUtil {
         label = label.substring(0, cutoffIndex);
         return label;
     }
+
+    public static double processNutrientString(String nutrient) {
+        Pattern gramsPattern = Pattern.compile("m*g");
+        Matcher gramsMatcher = gramsPattern.matcher(nutrient);
+        if(gramsMatcher.find()) {
+            return Double.valueOf(nutrient.substring(0, gramsMatcher.start()));
+        } else {
+            return Double.valueOf(nutrient);
+        }
+    }
+
+    public static class UserServingSize {
+        public double amount;
+        public String label;
+
+        private UserServingSize(double amount, String label) {
+            this.amount = amount;
+            this.label = label;
+        }
+    }
+
+    public static UserServingSize processServingSizeString(String servingSize) {
+        double amount = Double.valueOf(servingSize.substring(0, servingSize.indexOf(" ")));
+        String label = servingSize.substring(servingSize.indexOf(" ") + 1);
+        return new UserServingSize(amount, label);
+    }
 }

@@ -12,21 +12,27 @@ public class User {
 
     @Id
     @GeneratedValue
-    private int id;
+    public int id;
 
     @Column(name = "email_address")
-    private String emailAddress;
+    public String emailAddress;
 
-    private String password;
-
-    @OneToMany(mappedBy = "user")
-    private List<Consumption> consumptions;
+    public String password;
 
     @OneToMany(mappedBy = "user")
-    private List<Goal> goals;
+    public List<Consumption> consumptions;
 
     @OneToMany(mappedBy = "user")
-    private List<Exercise> exercise;
+    public List<Goal> goals;
+
+    @OneToMany(mappedBy = "user")
+    public List<Exercise> exercise;
+
+    @OneToMany
+    @JoinTable(name = "created_food",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "food_item_id"))
+    public List<FoodItem> createdFoods;
 
     public User(int id, String emailAddress, String password) {
         this.id = id;

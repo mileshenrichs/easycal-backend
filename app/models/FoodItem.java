@@ -29,6 +29,12 @@ public class FoodItem {
 
     public double sodium;
 
+    @ManyToOne
+    @JoinTable(name="created_food",
+            joinColumns = @JoinColumn(name = "food_item_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    public User creator;
+
     @OneToMany(mappedBy = "foodItem")
     public List<Consumption> consumptions;
 

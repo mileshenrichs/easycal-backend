@@ -1,7 +1,6 @@
 package controllers;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.time.DateUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import play.Play;
@@ -283,7 +282,8 @@ public class EasyCal extends Controller {
             consumption.servingSize = servingSize;
             consumption.servingQuantity = selectedServingObj.getDouble("quantity");
             consumption.meal = Meal.valueOf(reqObj.getString("meal").toUpperCase());
-            consumption.day = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
+            String day = reqObj.getString("day");
+            consumption.day = new SimpleDateFormat("yyyy-MM-dd").parse(day);
             JPA.em().persist(consumption);
         } catch (Exception e) {
             e.printStackTrace();
@@ -291,6 +291,63 @@ public class EasyCal extends Controller {
         } finally {
             renderText("");
         }
+    }
+
+    public static void createFood() {
+        try {
+            String reqBody = IOUtils.toString(request.body, "UTF-8");
+            JSONObject reqObj = new JSONObject(reqBody);
+            int userId = reqObj.getInt("userId");
+
+            FoodItem foodItem = new FoodItem();
+            foodItem.id = InfoUtil.generateFoodItemId();
+            foodItem.name = reqObj.getString("name");
+            foodItem.carbs = StringUtil.processNutrientString(reqObj.getString("carbs"));
+            foodItem.fat = StringUtil.processNutrientString(reqObj.getString("fat"));
+            foodItem.protein = StringUtil.processNutrientString(reqObj.getString("protein"));
+            foodItem.calories = InfoUtil.calculateCalories(foodItem.carbs, foodItem.fat, foodItem.protein);
+            foodItem.fiber = StringUtil.processNutrientString(reqObj.getString("fiber"));
+            foodItem.sugar = StringUtil.processNutrientString(reqObj.getString("sugar"));
+            foodItem.sodium = StringUtil.processNutrientString(reqObj.getString("sodium"));
+            foodItem.creator = DatabaseUtil.getUser(userId);
+            JPA.em().persist(foodItem);
+
+            StringUtil.UserServingSize ss = StringUtil.processServingSizeString(reqObj.getString("servingsize"));
+            ServingLabel servingLabel = DatabaseUtil.getServingLabelByValue(ss.label);
+            if(servingLabel == null) {
+                servingLabel = new ServingLabel();
+                servingLabel.labelValue = ss.label;
+                JPA.em().persist(servingLabel);
+            }
+            ServingSize servingSize = new ServingSize();
+            servingSize.foodItem = foodItem;
+            servingSize.label = servingLabel;
+            servingSize.ratio = 1.0 / ss.amount;
+            JPA.em().persist(servingSize);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.status = 404;
+        }
+        renderText("");
+    }
+
+    public static void getUserCreatedFoods(int userId) {
+        List<FoodItem> userFoods = DatabaseUtil.getUserFoodItems(userId);
+        if(userFoods.size() > 0) {
+            JsonArrayBuilder arr = Json.createArrayBuilder();
+            for (FoodItem item : userFoods) {
+                arr.add(JSONUtil.buildMealItem(item));
+            }
+            renderJSON(arr.build().toString());
+        } else {
+            response.status = 404;
+            renderText("");
+        }
+    }
+
+    public static void deleteUserCreatedFood(String id) {
+        response.status = DatabaseUtil.deleteUserFoodItem(id) ? 200 : 404;
+        renderText("");
     }
 
 }
