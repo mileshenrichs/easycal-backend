@@ -27,41 +27,52 @@ import javax.json.*;
 
 public class EasyCal extends Controller {
 
-    public static void getConsumptions(int userId, String date) {
-        Date day = new Date();
-        try {
-            day = new SimpleDateFormat("yyyy-MM-dd").parse(date);
-        } catch (ParseException e) {
-            JsonObject errorRes = Json.createObjectBuilder()
-                    .add("status", 400)
-                    .add("error", "Bad date format")
-                    .build();
-            renderJSON(errorRes.toString());
-        }
-        List<Consumption> consumptions = DatabaseUtil.getConsumptionsForDay(userId, day);
+    public static void getConsumptions(String type, int userId) {
+        if(type.equals("day")) { // get consumptions for given day
+            String date = request.params.get("date");
+            Date day = new Date();
+            try {
+                day = new SimpleDateFormat("yyyy-MM-dd").parse(date);
+            } catch (ParseException e) {
+                JsonObject errorRes = Json.createObjectBuilder()
+                        .add("status", 400)
+                        .add("error", "Bad date format")
+                        .build();
+                renderJSON(errorRes.toString());
+            }
+            List<Consumption> consumptions = DatabaseUtil.getConsumptionsForDay(userId, day);
 
-        HashMap<Meal, List<Consumption>> meals = new HashMap<>();
-        meals.put(Meal.BREAKFAST, new ArrayList<>());
-        meals.put(Meal.LUNCH, new ArrayList<>());
-        meals.put(Meal.DINNER, new ArrayList<>());
-        meals.put(Meal.SNACKS, new ArrayList<>());
-        for(Consumption consumption : consumptions) {
-            Meal meal = consumption.meal;
-            List<Consumption> consumptionsForMeal = meals.get(meal);
-            consumptionsForMeal.add(consumption);
-            meals.put(meal, consumptionsForMeal);
-        }
+            HashMap<Meal, List<Consumption>> meals = new HashMap<>();
+            meals.put(Meal.BREAKFAST, new ArrayList<>());
+            meals.put(Meal.LUNCH, new ArrayList<>());
+            meals.put(Meal.DINNER, new ArrayList<>());
+            meals.put(Meal.SNACKS, new ArrayList<>());
+            for(Consumption consumption : consumptions) {
+                Meal meal = consumption.meal;
+                List<Consumption> consumptionsForMeal = meals.get(meal);
+                consumptionsForMeal.add(consumption);
+                meals.put(meal, consumptionsForMeal);
+            }
 
-        JsonObjectBuilder res = Json.createObjectBuilder();
-        for(Meal meal : Meal.values()) {
+            JsonObjectBuilder res = Json.createObjectBuilder();
+            for(Meal meal : Meal.values()) {
+                JsonArrayBuilder items = Json.createArrayBuilder();
+                for(Consumption c : meals.get(meal)) {
+                    items.add(JSONUtil.buildMealItem(c));
+                }
+                res.add(meal.name().toLowerCase(), Json.createObjectBuilder()
+                        .add("items", items));
+            }
+            renderJSON(res.build().toString());
+        } else if(type.equals("recent")) { // get list of recently added food items
+            List<Consumption> consumptions = DatabaseUtil.getRecentConsumptions(userId);
             JsonArrayBuilder items = Json.createArrayBuilder();
-            for(Consumption c : meals.get(meal)) {
+            for(Consumption c : consumptions) {
                 items.add(JSONUtil.buildMealItem(c));
             }
-            res.add(meal.name().toLowerCase(), Json.createObjectBuilder()
-                            .add("items", items));
+            renderJSON(items.build().toString());
         }
-        renderJSON(res.build().toString());
+
     }
 
     public static void deleteConsumption(int consumptionId) {
@@ -274,7 +285,7 @@ public class EasyCal extends Controller {
             consumption.meal = Meal.valueOf(reqObj.getString("meal").toUpperCase());
             consumption.day = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
             JPA.em().persist(consumption);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             response.status = 404;
         } finally {

@@ -20,6 +20,12 @@ public class DatabaseUtil {
                 .getResultList();
     }
 
+    public static List<Consumption> getRecentConsumptions(int userId) {
+        return JPA.em().createQuery("SELECT c FROM Consumption c " +
+                "WHERE c.user.id = :userId ORDER BY c.day DESC")
+                .setParameter("userId", userId).getResultList();
+    }
+
     public static boolean deleteConsumption(int consumptionId) {
         Consumption consumption = JPA.em().find(Consumption.class, consumptionId);
         if(consumption != null) {
