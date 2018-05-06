@@ -283,7 +283,8 @@ public class EasyCal extends Controller {
             consumption.servingSize = servingSize;
             consumption.servingQuantity = selectedServingObj.getDouble("quantity");
             consumption.meal = Meal.valueOf(reqObj.getString("meal").toUpperCase());
-            consumption.day = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
+            String day = reqObj.getString("day");
+            consumption.day = new SimpleDateFormat("yyyy-MM-dd").parse(day);
             JPA.em().persist(consumption);
         } catch (Exception e) {
             e.printStackTrace();
