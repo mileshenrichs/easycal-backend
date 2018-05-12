@@ -10,5 +10,8 @@ GET     /api/foods/user/{userId}                EasyCal.getUserCreatedFoods
 POST    /api/foods                              EasyCal.createFood
 DELETE  /api/foods/{id}                         EasyCal.deleteUserCreatedFood
 
+GET     /api/exercise                           EasyCal.getExercise
+POST    /api/exercise                           EasyCal.addOrUpdateExercise
+
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}

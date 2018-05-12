@@ -13,17 +13,17 @@ public class Exercise {
 
     @Id
     @GeneratedValue
-    private int id;
+    public int id;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    public User user;
 
     @Column(name = "calories_burned")
-    private int caloriesBurned;
+    public int caloriesBurned;
 
     @Temporal(TemporalType.DATE)
-    private Date day;
+    public Date day;
 
     public Exercise(int id, User user, int caloriesBurned, Date day) {
         this.id = id;

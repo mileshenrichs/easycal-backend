@@ -97,4 +97,14 @@ public class DatabaseUtil {
         return false;
     }
 
+    public static Exercise getExerciseForDay(int userId, Date day) {
+        User user = JPA.em().find(User.class, userId);
+        List<Exercise> exercises = JPA.em().createQuery("SELECT e FROM Exercise e " +
+                "WHERE e.user = :user AND e.day = :day").setParameter("day", day).setParameter("user", user).getResultList();
+        if(exercises.size() > 0) {
+            return exercises.get(0);
+        }
+        return null;
+    }
+
 }

@@ -254,14 +254,17 @@ public class EasyCal extends Controller {
                 JSONArray servingSizesArr = reqObj.getJSONArray("servingSizes");
                 for(int i = 0; i < servingSizesArr.length(); i++) {
                     JSONObject servingObj = servingSizesArr.getJSONObject(i);
-                    String servingLabel = servingObj.getString("label");
-                    ServingLabel label = new ServingLabel();
-                    label.labelValue = servingLabel;
-                    JPA.em().persist(label);
+                    String servingLabelString = servingObj.getString("label");
+                    ServingLabel servingLabel = DatabaseUtil.getServingLabelByValue(servingLabelString);
+                    if(servingLabel == null) {
+                        servingLabel = new ServingLabel();
+                        servingLabel.labelValue = servingLabelString;
+                        JPA.em().persist(servingLabel);
+                    }
 
                     ServingSize servingSize = new ServingSize();
                     servingSize.foodItem = foodItem;
-                    servingSize.label = label;
+                    servingSize.label = servingLabel;
                     servingSize.ratio = servingObj.getDouble("ratio");
                     JPA.em().persist(servingSize);
                     selectedServingId = servingSize.id;
@@ -346,6 +349,51 @@ public class EasyCal extends Controller {
     public static void deleteUserCreatedFood(String id) {
         response.status = DatabaseUtil.deleteUserFoodItem(id) ? 200 : 404;
         renderText("");
+    }
+
+    public static void addOrUpdateExercise() {
+        try {
+            String reqBody = IOUtils.toString(request.body, "UTF-8");
+            System.out.println(reqBody);
+            JSONObject reqObj = new JSONObject(reqBody);
+
+            int userId = reqObj.getInt("userId");
+            String dateStr = reqObj.getString("day").substring(0, 10);
+            Date day = new SimpleDateFormat("yyyy-MM-dd").parse(dateStr);
+            Exercise exercise = DatabaseUtil.getExerciseForDay(userId, day);
+            if(exercise == null) { // create new exercise entry for day
+                exercise = new Exercise();
+                exercise.user = DatabaseUtil.getUser(userId);
+                exercise.caloriesBurned = reqObj.getInt("caloriesBurned");
+                exercise.day = day;
+                JPA.em().persist(exercise);
+            } else { // update existing exercise entry
+                if(reqObj.getInt("caloriesBurned") == 0) {
+                    JPA.em().remove(exercise); // just delete exercise entry if set to 0
+                } else {
+                    exercise.caloriesBurned = reqObj.getInt("caloriesBurned");
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void getExercise(int userId, String date) {
+        try {
+            Date day = new SimpleDateFormat("yyyy-MM-dd").parse(date);
+            Exercise exercise = DatabaseUtil.getExerciseForDay(userId, day);
+            int caloriesBurned = exercise != null ? exercise.caloriesBurned : 0;
+            JsonObjectBuilder res = Json.createObjectBuilder()
+                    .add("caloriesBurned", caloriesBurned);
+            renderJSON(res.build().toString());
+        } catch (ParseException e) {
+            e.printStackTrace();
+            response.status = 404;
+            renderText("");
+        }
     }
 
 }
