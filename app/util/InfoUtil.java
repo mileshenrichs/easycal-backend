@@ -21,7 +21,7 @@ public class InfoUtil {
 
     public static String generateFoodItemId() {
         String characterSet = "abcdefg1234567890";
-        StringBuilder sb = new StringBuilder(); //consider using StringBuffer if needed
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 10; i++) {
             int randomInt = new SecureRandom().nextInt(characterSet.length());
             sb.append(characterSet.substring(randomInt, randomInt + 1));

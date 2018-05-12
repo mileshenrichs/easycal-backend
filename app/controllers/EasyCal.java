@@ -171,7 +171,6 @@ public class EasyCal extends Controller {
 
             // get nutrition information
             HashMap<String, Double> nutritionMap = new HashMap<>();
-            nutritionMap.put("calories", -1.0);
             nutritionMap.put("carbs", -1.0);
             nutritionMap.put("fat", -1.0);
             nutritionMap.put("protein", -1.0);
@@ -180,13 +179,10 @@ public class EasyCal extends Controller {
             nutritionMap.put("sodium", -1.0);
             int i = 0;
             while(InfoUtil.containsNegative(new double[]
-                    {nutritionMap.get("calories"), nutritionMap.get("carbs"), nutritionMap.get("fat"),
-                     nutritionMap.get("protein"), nutritionMap.get("fiber"), nutritionMap.get("sugar"), nutritionMap.get("sodium")})) {
+                    {nutritionMap.get("carbs"), nutritionMap.get("fat"), nutritionMap.get("protein"),
+                    nutritionMap.get("fiber"), nutritionMap.get("sugar"), nutritionMap.get("sodium")})) {
                 JSONObject nutrientObj = nutrientsArr.getJSONObject(i);
                 switch(nutrientObj.getString("name")) {
-                    case "Energy":
-                        nutritionMap.put("calories", nutrientObj.getDouble("value"));
-                        break;
                     case "Carbohydrate, by difference":
                         nutritionMap.put("carbs", nutrientObj.getDouble("value"));
                         break;
@@ -207,17 +203,19 @@ public class EasyCal extends Controller {
                         break;
                 }
                 i++;
-                if(i == nutrientsArr.length()) { // don't have values for some nutrient(s)
+                // if don't have values for some nutrient(s), set all default -1.0 values to 0
+                if(i == nutrientsArr.length()) {
                     for(String nutrient : nutritionMap.keySet()) {
-                        // set all default -1.0 values to 0
                         if(nutritionMap.get(nutrient) < 0) {
                             nutritionMap.put(nutrient, 0.0);
                         }
                     }
                 }
             }
+            // calculate calories from macros (database is often inaccurate)
+            double calories = InfoUtil.calculateCalories(nutritionMap.get("carbs"), nutritionMap.get("fat"), nutritionMap.get("protein"));
             FoodItem foodItem = new FoodItem(foodItemId, name, servingSizes,
-                    nutritionMap.get("calories"), nutritionMap.get("carbs"), nutritionMap.get("fat"),
+                    calories, nutritionMap.get("carbs"), nutritionMap.get("fat"),
                     nutritionMap.get("protein"), nutritionMap.get("fiber"), nutritionMap.get("sugar"), nutritionMap.get("sodium"));
             JsonObjectBuilder item = JSONUtil.buildMealItem(foodItem);
 
@@ -240,7 +238,7 @@ public class EasyCal extends Controller {
             FoodItem foodItem = DatabaseUtil.getFoodItem(reqObj.getString("foodItemId"));
 
             if(foodItem == null) {
-                // create food item
+                // create food item if doesn't exist
                 foodItem = new FoodItem();
                 foodItem.id = reqObj.getString("foodItemId");
                 foodItem.name = reqObj.getString("name");
