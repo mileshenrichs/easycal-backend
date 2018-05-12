@@ -159,13 +159,22 @@ public class EasyCal extends Controller {
             // get list of serving sizes
             JSONArray measuresArr = nutrientsArr.getJSONObject(0).getJSONArray("measures");
             List<ServingSize> servingSizes = new ArrayList<>();
-            for(int i = 0; i < measuresArr.length(); i++) {
-                JSONObject servingObj = measuresArr.getJSONObject(i);
-                ServingLabel label = new ServingLabel();
-                label.labelValue = StringUtil.formatServingSizeLabel(servingObj.getString("label"));
+
+            // make sure there are actually measures provided
+            if(measuresArr.length() > 0) {
+                for(int i = 0; i < measuresArr.length(); i++) {
+                    JSONObject servingObj = measuresArr.getJSONObject(i);
+                    ServingLabel label = new ServingLabel();
+                    label.labelValue = StringUtil.formatServingSizeLabel(servingObj.getString("label"));
+                    ServingSize servingSize = new ServingSize();
+                    servingSize.label = label;
+                    servingSize.ratio = (double) servingObj.getInt("eqv") / 100;
+                    servingSizes.add(servingSize);
+                }
+            } else { // create default 100 g measure
                 ServingSize servingSize = new ServingSize();
-                servingSize.label = label;
-                servingSize.ratio = (double) servingObj.getInt("eqv") / 100;
+                servingSize.label = JPA.em().find(ServingLabel.class, 28); // 28 is id of "g" serving label
+                servingSize.ratio = 0.01;
                 servingSizes.add(servingSize);
             }
 
@@ -245,6 +254,7 @@ public class EasyCal extends Controller {
                 foodItem.calories = reqObj.getDouble("calories");
                 foodItem.carbs = reqObj.getDouble("carbs");
                 foodItem.fat = reqObj.getDouble("fat");
+                foodItem.protein = reqObj.getDouble("protein");
                 foodItem.fiber = reqObj.getDouble("fiber");
                 foodItem.sugar = reqObj.getDouble("sugar");
                 foodItem.sodium = reqObj.getDouble("sodium");
