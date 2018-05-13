@@ -277,7 +277,10 @@ public class EasyCal extends Controller {
                     servingSize.label = servingLabel;
                     servingSize.ratio = servingObj.getDouble("ratio");
                     JPA.em().persist(servingSize);
-                    selectedServingId = servingSize.id;
+                    // set selectedServingId only if given serving size was selected
+                    if(selectedServingObj.getJSONObject("servingSize").getInt("id") == i) {
+                        selectedServingId = servingSize.id;
+                    }
                 }
             } else {
                 selectedServingId = DatabaseUtil.findServingSizeId(foodItem,
@@ -404,6 +407,61 @@ public class EasyCal extends Controller {
             response.status = 404;
             renderText("");
         }
+    }
+
+    public static void setGoals() {
+        try {
+            String reqBody = IOUtils.toString(request.body, "UTF-8");
+            JSONObject reqObj = new JSONObject(reqBody);
+            int userId = reqObj.getInt("userId");
+
+            User user = JPA.em().find(User.class, userId);
+            List<Goal> userGoals = user.goals;
+            HashMap<Goal.GoalCategory, Goal> goalMap = new HashMap<>();
+            for(Goal goal : userGoals) {
+                goalMap.put(goal.goalCategory, goal);
+            }
+
+            for(Goal.GoalCategory category : Goal.GoalCategory.values()) {
+                String categoryString = category.toString().toLowerCase();
+                if(reqObj.has(categoryString)) {
+                    if(goalMap.containsKey(category)) {
+                        Goal categoryGoal = goalMap.get(category);
+                        if(categoryGoal.goalValue != reqObj.getInt(categoryString)) {
+                            categoryGoal.goalValue = reqObj.getInt(categoryString);
+                        }
+                    } else {
+                        Goal categoryGoal = new Goal();
+                        categoryGoal.user = user;
+                        categoryGoal.goalCategory = category;
+                        categoryGoal.goalValue = reqObj.getInt(categoryString);
+                        JPA.em().persist(categoryGoal);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            response.status = 404;
+        }
+        renderText("");
+    }
+
+    public static void getUserGoals(int userId) {
+        List<Goal> userGoals = JPA.em().find(User.class, userId).goals;
+        HashMap<Goal.GoalCategory, Goal> goalMap = new HashMap<>();
+        for(Goal goal : userGoals) {
+            goalMap.put(goal.goalCategory, goal);
+        }
+
+        JsonObjectBuilder res = Json.createObjectBuilder()
+                .add("calories", goalMap.containsKey(Goal.GoalCategory.CALORIES) ? goalMap.get(Goal.GoalCategory.CALORIES).goalValue : -1)
+                .add("carbs", goalMap.containsKey(Goal.GoalCategory.CARBS) ? goalMap.get(Goal.GoalCategory.CARBS).goalValue : -1)
+                .add("fat", goalMap.containsKey(Goal.GoalCategory.FAT) ? goalMap.get(Goal.GoalCategory.FAT).goalValue : -1)
+                .add("protein", goalMap.containsKey(Goal.GoalCategory.PROTEIN) ? goalMap.get(Goal.GoalCategory.PROTEIN).goalValue : -1)
+                .add("fiber", goalMap.containsKey(Goal.GoalCategory.FIBER) ? goalMap.get(Goal.GoalCategory.FIBER).goalValue : -1)
+                .add("sugar", goalMap.containsKey(Goal.GoalCategory.SUGAR) ? goalMap.get(Goal.GoalCategory.SUGAR).goalValue : -1)
+                .add("sodium", goalMap.containsKey(Goal.GoalCategory.SODIUM) ? goalMap.get(Goal.GoalCategory.SODIUM).goalValue : -1);
+        renderJSON(res.build().toString());
     }
 
 }

@@ -11,25 +11,18 @@ public class Goal {
 
     @Id
     @GeneratedValue
-    private int id;
+    public int id;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    public User user;
 
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "goal_category")
-    private GoalCategory goalCategory;
+    public GoalCategory goalCategory;
 
     @Column(name = "goal_value")
-    private int goalValue;
-
-    public Goal(int id, User user, GoalCategory goalCategory, int goalValue) {
-        this.id = id;
-        this.user = user;
-        this.goalCategory = goalCategory;
-        this.goalValue = goalValue;
-    }
+    public int goalValue;
 
     public Goal() {}
 

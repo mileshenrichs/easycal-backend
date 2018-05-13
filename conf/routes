@@ -13,5 +13,8 @@ DELETE  /api/foods/{id}                         EasyCal.deleteUserCreatedFood
 GET     /api/exercise                           EasyCal.getExercise
 POST    /api/exercise                           EasyCal.addOrUpdateExercise
 
+POST    /api/goals                              EasyCal.setGoals
+GET     /api/goals/{userId}                     EasyCal.getUserGoals
+
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}
