@@ -1,6 +1,10 @@
 package util;
 
+import models.Consumption;
+import models.Goal;
+
 import java.security.SecureRandom;
+import java.util.Date;
 
 /**
  * General util class for miscellaneous methods
@@ -27,5 +31,27 @@ public class InfoUtil {
             sb.append(characterSet.substring(randomInt, randomInt + 1));
         }
         return sb.toString();
+    }
+
+    public static class DayTotals {
+        public Date day;
+        public int carbs;
+        public int fat;
+        public int protein;
+        public int fiber;
+        public int sugar;
+        public int sodium;
+        public int calories;
+
+        public DayTotals(Date day, int carbs, int fat, int protein, int fiber, int sugar, int sodium, int calories) {
+            this.day = day;
+            this.carbs = carbs;
+            this.fat = fat;
+            this.protein = protein;
+            this.fiber = fiber;
+            this.sugar = sugar;
+            this.sodium = sodium;
+            this.calories = calories;
+        }
     }
 }

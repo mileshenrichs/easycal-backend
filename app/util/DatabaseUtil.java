@@ -27,6 +27,14 @@ public class DatabaseUtil {
                 .setParameter("userId", userId).getResultList();
     }
 
+    public static List<Consumption> getConsumptionsInRange(int userId, Date from, Date to) {
+        return JPA.em().createQuery("SELECT c FROM Consumption c " +
+                "WHERE c.user.id = :userId " +
+                "AND c.day BETWEEN :dateFrom AND :dateTo ORDER BY c.day DESC")
+                .setParameter("userId", userId).setParameter("dateFrom", from).setParameter("dateTo", to)
+                .getResultList();
+    }
+
     public static boolean deleteConsumption(int consumptionId) {
         Consumption consumption = JPA.em().find(Consumption.class, consumptionId);
         if(consumption != null) {
@@ -105,6 +113,12 @@ public class DatabaseUtil {
             return exercises.get(0);
         }
         return null;
+    }
+
+    public static List<Exercise> getExercisesForDateRange(int userId, Date dayFrom, Date dayTo) {
+        return JPA.em().createQuery("SELECT e FROM Exercise e WHERE e.user.id = :userId " +
+                "AND e.day BETWEEN :dayFrom AND :dayTo ORDER BY e.day ASC").setParameter("userId", userId)
+                .setParameter("dayFrom", dayFrom).setParameter("dayTo", dayTo).getResultList();
     }
 
 }

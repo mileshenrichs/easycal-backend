@@ -116,7 +116,7 @@ public class EasyCal extends Controller {
             JSONArray resArr = resObj.getJSONObject("list").getJSONArray("item");
 
             JSONArray processedList = new JSONArray();
-            for(int i = 0; i < resArr.length() && processedList.length() <= 25; i++) {
+            for(int i = 0; i < resArr.length() && processedList.length() <= 40; i++) {
                 JSONObject item = resArr.getJSONObject(i);
                 String itemName = StringUtil.formatFoodItemName(item.getString("name"));
                 // filter out items with super long names
@@ -462,6 +462,123 @@ public class EasyCal extends Controller {
                 .add("sugar", goalMap.containsKey(Goal.GoalCategory.SUGAR) ? goalMap.get(Goal.GoalCategory.SUGAR).goalValue : -1)
                 .add("sodium", goalMap.containsKey(Goal.GoalCategory.SODIUM) ? goalMap.get(Goal.GoalCategory.SODIUM).goalValue : -1);
         renderJSON(res.build().toString());
+    }
+
+    public static void getCumulativeStatistics(int userId, String dateFrom, String dateTo) {
+        try {
+            Date fromDay = new SimpleDateFormat("yyyy-MM-dd").parse(dateFrom.substring(0, 10));
+            Date toDay = new SimpleDateFormat("yyyy-MM-dd").parse(dateTo.substring(0, 10));
+            List<Consumption> consumptions = DatabaseUtil.getConsumptionsInRange(userId, fromDay, toDay);
+
+            List<List<Consumption>> consumptionsByDay = new ArrayList<>();
+            List<Consumption> dailyConsumptions = new ArrayList<>();
+            Date currentDay = consumptions.get(0).day;
+            for(Consumption consumption : consumptions) {
+                Date consumptionDate = consumption.day;
+                if(consumptionDate.compareTo(currentDay) == 0) {
+                    dailyConsumptions.add(consumption);
+                } else {
+                    consumptionsByDay.add(dailyConsumptions);
+                    dailyConsumptions = new ArrayList<>();
+                    dailyConsumptions.add(consumption);
+                    currentDay = consumptionDate;
+                }
+            }
+            consumptionsByDay.add(dailyConsumptions);
+
+            // create list of DayTotals objects for each day
+            List<InfoUtil.DayTotals> dayTotals = new ArrayList<>();
+            for(List<Consumption> consumptionList : consumptionsByDay) {
+                // hashmap to accumulate totals for given day
+                HashMap<Goal.GoalCategory, Integer> totals = new HashMap<>();
+                for(Goal.GoalCategory category : Goal.GoalCategory.values()) {
+                    totals.put(category, 0);
+                }
+
+                for(Consumption consumption : consumptionList) {
+                    for(Goal.GoalCategory category : Goal.GoalCategory.values()) {
+                        totals.put(category, totals.get(category) + consumption.calculateCategoryValue(category));
+                    }
+                }
+                dayTotals.add(new InfoUtil.DayTotals(consumptionList.get(0).day, totals.get(Goal.GoalCategory.CARBS), totals.get(Goal.GoalCategory.FAT),
+                        totals.get(Goal.GoalCategory.PROTEIN), totals.get(Goal.GoalCategory.FIBER), totals.get(Goal.GoalCategory.SUGAR),
+                        totals.get(Goal.GoalCategory.SODIUM), totals.get(Goal.GoalCategory.CALORIES)));
+            }
+
+            // calculate averages
+            InfoUtil.DayTotals averages = new InfoUtil.DayTotals(null, 0, 0, 0, 0, 0, 0, 0);
+            for(InfoUtil.DayTotals dayTotal : dayTotals) {
+                averages.carbs += dayTotal.carbs;
+                averages.fat += dayTotal.fat;
+                averages.protein += dayTotal.protein;
+                averages.fiber += dayTotal.fiber;
+                averages.sugar += dayTotal.sugar;
+                averages.sodium += dayTotal.sodium;
+                averages.calories += dayTotal.calories;
+            }
+            // create overall totals object before dividing to find averages
+            JsonObjectBuilder overallTotalsObj = Json.createObjectBuilder()
+                    .add("carbs", averages.carbs)
+                    .add("fat", averages.fat)
+                    .add("protein", averages.protein)
+                    .add("fiber", averages.fiber)
+                    .add("sugar", averages.sugar)
+                    .add("sodium", averages.sodium)
+                    .add("calories", averages.calories);
+            int daysInRange = dayTotals.size();
+            averages.carbs /= daysInRange;
+            averages.fat /= daysInRange;
+            averages.protein /= daysInRange;
+            averages.fiber /= daysInRange;
+            averages.sugar /= daysInRange;
+            averages.sodium /= daysInRange;
+            averages.calories /= daysInRange;
+
+            // create totals JSON array
+            JsonArrayBuilder totalsArr = Json.createArrayBuilder();
+            for(InfoUtil.DayTotals totals : dayTotals) {
+                String dateStr = new SimpleDateFormat("EEEE, MMMMM d").format(totals.day);
+                totalsArr.add(Json.createObjectBuilder()
+                    .add("day", dateStr)
+                    .add("carbs", totals.carbs)
+                    .add("fat", totals.fat)
+                    .add("protein", totals.protein)
+                    .add("fiber", totals.fiber)
+                    .add("sugar", totals.sugar)
+                    .add("sodium", totals.sodium)
+                    .add("calories", totals.calories));
+            }
+
+            // create averages JSON object
+            JsonObjectBuilder averagesObj = Json.createObjectBuilder()
+                    .add("calories", averages.calories)
+                    .add("carbs", averages.carbs)
+                    .add("fat", averages.fat)
+                    .add("protein", averages.protein)
+                    .add("fiber", averages.fiber)
+                    .add("sugar", averages.sugar)
+                    .add("sodium", averages.sodium);
+
+            // create exercise JSON array
+            List<Exercise> userExercise = DatabaseUtil.getExercisesForDateRange(userId, fromDay, toDay);
+            JsonArrayBuilder exerciseArr = Json.createArrayBuilder();
+            for(Exercise exercise : userExercise) {
+                exerciseArr.add(Json.createObjectBuilder()
+                        .add("day", new SimpleDateFormat("EEEE, MMMMM d").format(exercise.day))
+                        .add("caloriesBurned", exercise.caloriesBurned));
+            }
+
+            JsonObjectBuilder res = Json.createObjectBuilder()
+                    .add("totals", totalsArr)
+                    .add("overallTotals", overallTotalsObj)
+                    .add("averages", averagesObj)
+                    .add("exercise", exerciseArr);
+            renderJSON(res.build().toString());
+        } catch(ParseException e) {
+            e.printStackTrace();
+            response.status = 404;
+            renderText("");
+        }
     }
 
 }

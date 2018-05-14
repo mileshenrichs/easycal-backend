@@ -16,5 +16,7 @@ POST    /api/exercise                           EasyCal.addOrUpdateExercise
 POST    /api/goals                              EasyCal.setGoals
 GET     /api/goals/{userId}                     EasyCal.getUserGoals
 
+GET     /api/stats                              EasyCal.getCumulativeStatistics
+
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}

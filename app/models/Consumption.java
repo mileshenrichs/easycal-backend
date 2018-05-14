@@ -2,6 +2,7 @@ package models;
 
 import javax.persistence.*;
 
+import java.lang.reflect.Field;
 import java.util.Date;
 
 /**
@@ -36,16 +37,23 @@ public class Consumption {
     @Temporal(TemporalType.DATE)
     public Date day;
 
-    public Consumption(int id, User user, FoodItem foodItem, ServingSize servingSize,
-                       double servingQuantity, Meal meal, Date day) {
-        this.id = id;
-        this.user = user;
-        this.foodItem = foodItem;
-        this.servingSize = servingSize;
-        this.servingQuantity = servingQuantity;
-        this.meal = meal;
-        this.day = day;
-    }
-
     public Consumption() {}
+
+    /**
+     * Calculate amount of given nutrient (category) consumed in this consumption
+     * @param category specified nutrient
+     * @return amount of nutrient consumed
+     */
+    public int calculateCategoryValue(Goal.GoalCategory category) {
+        try {
+            Field field = FoodItem.class.getField(category.toString().toLowerCase());
+            double fieldValue = (double) field.get(this.foodItem);
+            return (int) Math.round(this.servingQuantity * this.servingSize.ratio * fieldValue);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }
