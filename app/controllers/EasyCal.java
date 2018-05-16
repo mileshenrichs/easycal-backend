@@ -537,9 +537,11 @@ public class EasyCal extends Controller {
             // create totals JSON array
             JsonArrayBuilder totalsArr = Json.createArrayBuilder();
             for(InfoUtil.DayTotals totals : dayTotals) {
-                String dateStr = new SimpleDateFormat("EEEE, MMMMM d").format(totals.day);
+                String dateStr = new SimpleDateFormat("yyyy-MM-dd").format(totals.day);
+                String displayDateStr = new SimpleDateFormat("EEEE, MMMMM d").format(totals.day);
                 totalsArr.add(Json.createObjectBuilder()
                     .add("day", dateStr)
+                    .add("displayDay", displayDateStr)
                     .add("carbs", totals.carbs)
                     .add("fat", totals.fat)
                     .add("protein", totals.protein)
@@ -564,7 +566,7 @@ public class EasyCal extends Controller {
             JsonArrayBuilder exerciseArr = Json.createArrayBuilder();
             for(Exercise exercise : userExercise) {
                 exerciseArr.add(Json.createObjectBuilder()
-                        .add("day", new SimpleDateFormat("EEEE, MMMMM d").format(exercise.day))
+                        .add("day", new SimpleDateFormat("yyyy-MM-dd").format(exercise.day))
                         .add("caloriesBurned", exercise.caloriesBurned));
             }
 

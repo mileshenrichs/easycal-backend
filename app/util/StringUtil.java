@@ -23,7 +23,12 @@ public class StringUtil {
         // convert to lower case
         label = label.toLowerCase();
         // remove any qualifiers
-        int cutoffIndex = label.contains(",") ? label.indexOf(",") : label.length();
+        int cutoffIndex = label.length();
+        if(label.contains("|")) {
+            cutoffIndex = label.indexOf("|") - 1;
+        } else if(label.contains(",")) {
+            cutoffIndex = label.indexOf(",");
+        }
         label = label.substring(0, cutoffIndex);
         return label;
     }
