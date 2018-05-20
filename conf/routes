@@ -18,5 +18,10 @@ GET     /api/goals/{userId}                     EasyCal.getUserGoals
 
 GET     /api/stats                              EasyCal.getCumulativeStatistics
 
+# User creation & auth
+POST    /api/users/register                     Auth.registerUser
+POST    /api/users/login                        Auth.logInUser
+POST    /api/auth/check                         Auth.checkAuth
+
 # Catch all
 *       /{controller}/{action}                  {controller}.{action}

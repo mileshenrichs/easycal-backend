@@ -121,4 +121,29 @@ public class DatabaseUtil {
                 .setParameter("dayFrom", dayFrom).setParameter("dayTo", dayTo).getResultList();
     }
 
+    public static User getUserByEmailAddress(String emailAddress) {
+        List<User> users = JPA.em().createQuery("SELECT u FROM User u WHERE u.emailAddress = :email")
+                .setParameter("email", emailAddress).getResultList();
+        if(users.size() > 0) {
+            return users.get(0);
+        }
+        return null;
+    }
+
+    public static boolean userExists(String emailAddress) {
+        List<User> users = JPA.em().createQuery("SELECT u FROM User u WHERE u.emailAddress = :email")
+                .setParameter("email", emailAddress).getResultList();
+        return users.size() > 0;
+    }
+
+    // Returns created user id (used to build JWT)
+    public static User createUser(String emailAddress, String hashedPass) {
+        User newUser = new User();
+        newUser.emailAddress = emailAddress;
+        newUser.password = hashedPass;
+        JPA.em().persist(newUser);
+
+        return newUser;
+    }
+
 }
