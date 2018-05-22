@@ -1,5 +1,7 @@
 package controllers;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureException;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -7,9 +9,7 @@ import play.Play;
 import play.db.jpa.JPA;
 import play.mvc.*;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.ParseException;
@@ -17,14 +17,47 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import models.*;
-import util.DatabaseUtil;
-import util.InfoUtil;
-import util.JSONUtil;
-import util.StringUtil;
+import util.*;
 
 import javax.json.*;
 
 public class EasyCal extends Controller {
+
+    @Before(unless = {"searchFoods", "getFoodDetails"})
+    static void checkAuth() {
+        String reqBody = "";
+        String token = null;
+        boolean authenticated = false;
+        try {
+            reqBody = IOUtils.toString(request.body, "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if(reqBody.length() > 0) {
+            JSONObject reqObj = new JSONObject(reqBody);
+            if(reqObj.has("token")) {
+                token = reqObj.getString("token");
+            }
+        } else if(params.get("token") != null) {
+            token = params.get("token");
+        }
+
+        if(token != null) {
+            try {
+                Jwts.parser().setSigningKey(Secret.appSecret()).parseClaimsJws(token);
+                // JWT is valid
+                authenticated = true;
+            } catch (SignatureException e) {
+                // invalid JWT
+            }
+        }
+
+        if(!authenticated) {
+            response.status = 403;
+            renderText("");
+        }
+    }
 
     public static void getConsumptions(String type, int userId) {
         if(type.equals("day")) { // get consumptions for given day
@@ -81,11 +114,14 @@ public class EasyCal extends Controller {
 
     public static void updateConsumption(int consumptionId) {
         try {
-            String reqBody = IOUtils.toString(request.body, "UTF-8");
+            InputStream bodyStream = request.body;
+            bodyStream.reset();
+            String reqBody = IOUtils.toString(bodyStream, "UTF-8");
+
             JSONObject reqObj = new JSONObject(reqBody);
-            int servingSizeId = reqObj.getJSONObject("selectedServing")
+            int servingSizeId = reqObj.getJSONObject("consumption").getJSONObject("selectedServing")
                     .getJSONObject("servingSize").getInt("id");
-            double quantity = reqObj.getJSONObject("selectedServing")
+            double quantity = reqObj.getJSONObject("consumption").getJSONObject("selectedServing")
                     .getDouble("quantity");
             response.status =
                     DatabaseUtil.updateConsumption(consumptionId, servingSizeId, quantity) ? 200 : 404;
@@ -238,30 +274,33 @@ public class EasyCal extends Controller {
 
     public static void createNewConsumption() {
         try {
-            String reqBody = IOUtils.toString(request.body, "UTF-8");
-            JSONObject reqObj = new JSONObject(reqBody);
-            JSONObject selectedServingObj = reqObj.getJSONObject("selectedServing");
+            InputStream bodyStream = request.body;
+            bodyStream.reset();
+            String reqBody = IOUtils.toString(bodyStream, "UTF-8");
+
+            JSONObject consumptionObj = new JSONObject(reqBody).getJSONObject("consumption");
+            JSONObject selectedServingObj = consumptionObj.getJSONObject("selectedServing");
             int selectedServingId = -1;
 
             // get corresponding food item
-            FoodItem foodItem = DatabaseUtil.getFoodItem(reqObj.getString("foodItemId"));
+            FoodItem foodItem = DatabaseUtil.getFoodItem(consumptionObj.getString("foodItemId"));
 
             if(foodItem == null) {
                 // create food item if doesn't exist
                 foodItem = new FoodItem();
-                foodItem.id = reqObj.getString("foodItemId");
-                foodItem.name = reqObj.getString("name");
-                foodItem.calories = reqObj.getDouble("calories");
-                foodItem.carbs = reqObj.getDouble("carbs");
-                foodItem.fat = reqObj.getDouble("fat");
-                foodItem.protein = reqObj.getDouble("protein");
-                foodItem.fiber = reqObj.getDouble("fiber");
-                foodItem.sugar = reqObj.getDouble("sugar");
-                foodItem.sodium = reqObj.getDouble("sodium");
+                foodItem.id = consumptionObj.getString("foodItemId");
+                foodItem.name = consumptionObj.getString("name");
+                foodItem.calories = consumptionObj.getDouble("calories");
+                foodItem.carbs = consumptionObj.getDouble("carbs");
+                foodItem.fat = consumptionObj.getDouble("fat");
+                foodItem.protein = consumptionObj.getDouble("protein");
+                foodItem.fiber = consumptionObj.getDouble("fiber");
+                foodItem.sugar = consumptionObj.getDouble("sugar");
+                foodItem.sodium = consumptionObj.getDouble("sodium");
                 JPA.em().persist(foodItem);
 
                 // create serving size entities
-                JSONArray servingSizesArr = reqObj.getJSONArray("servingSizes");
+                JSONArray servingSizesArr = consumptionObj.getJSONArray("servingSizes");
                 for(int i = 0; i < servingSizesArr.length(); i++) {
                     JSONObject servingObj = servingSizesArr.getJSONObject(i);
                     String servingLabelString = servingObj.getString("label");
@@ -289,14 +328,14 @@ public class EasyCal extends Controller {
 
             // create consumption
             Consumption consumption = new Consumption();
-            User user = DatabaseUtil.getUser(reqObj.getInt("userId"));
+            User user = DatabaseUtil.getUser(consumptionObj.getInt("userId"));
             consumption.user = user;
             consumption.foodItem = foodItem;
             ServingSize servingSize = DatabaseUtil.getServingSize(selectedServingId);
             consumption.servingSize = servingSize;
             consumption.servingQuantity = selectedServingObj.getDouble("quantity");
-            consumption.meal = Meal.valueOf(reqObj.getString("meal").toUpperCase());
-            String day = reqObj.getString("day");
+            consumption.meal = Meal.valueOf(consumptionObj.getString("meal").toUpperCase());
+            String day = consumptionObj.getString("day");
             consumption.day = new SimpleDateFormat("yyyy-MM-dd").parse(day);
             JPA.em().persist(consumption);
         } catch (Exception e) {
@@ -309,24 +348,26 @@ public class EasyCal extends Controller {
 
     public static void createFood() {
         try {
-            String reqBody = IOUtils.toString(request.body, "UTF-8");
-            JSONObject reqObj = new JSONObject(reqBody);
-            int userId = reqObj.getInt("userId");
+            InputStream bodyStream = request.body;
+            bodyStream.reset();
+            String reqBody = IOUtils.toString(bodyStream, "UTF-8");
+            JSONObject foodObj = new JSONObject(reqBody).getJSONObject("foodItem");
+            int userId = foodObj.getInt("userId");
 
             FoodItem foodItem = new FoodItem();
             foodItem.id = InfoUtil.generateFoodItemId();
-            foodItem.name = reqObj.getString("name");
-            foodItem.carbs = StringUtil.processNutrientString(reqObj.getString("carbs"));
-            foodItem.fat = StringUtil.processNutrientString(reqObj.getString("fat"));
-            foodItem.protein = StringUtil.processNutrientString(reqObj.getString("protein"));
+            foodItem.name = foodObj.getString("name");
+            foodItem.carbs = StringUtil.processNutrientString(foodObj.getString("carbs"));
+            foodItem.fat = StringUtil.processNutrientString(foodObj.getString("fat"));
+            foodItem.protein = StringUtil.processNutrientString(foodObj.getString("protein"));
             foodItem.calories = InfoUtil.calculateCalories(foodItem.carbs, foodItem.fat, foodItem.protein);
-            foodItem.fiber = StringUtil.processNutrientString(reqObj.getString("fiber"));
-            foodItem.sugar = StringUtil.processNutrientString(reqObj.getString("sugar"));
-            foodItem.sodium = StringUtil.processNutrientString(reqObj.getString("sodium"));
+            foodItem.fiber = StringUtil.processNutrientString(foodObj.getString("fiber"));
+            foodItem.sugar = StringUtil.processNutrientString(foodObj.getString("sugar"));
+            foodItem.sodium = StringUtil.processNutrientString(foodObj.getString("sodium"));
             foodItem.creator = DatabaseUtil.getUser(userId);
             JPA.em().persist(foodItem);
 
-            StringUtil.UserServingSize ss = StringUtil.processServingSizeString(reqObj.getString("servingsize"));
+            StringUtil.UserServingSize ss = StringUtil.processServingSizeString(foodObj.getString("servingsize"));
             ServingLabel servingLabel = DatabaseUtil.getServingLabelByValue(ss.label);
             if(servingLabel == null) {
                 servingLabel = new ServingLabel();
@@ -366,25 +407,26 @@ public class EasyCal extends Controller {
 
     public static void addOrUpdateExercise() {
         try {
-            String reqBody = IOUtils.toString(request.body, "UTF-8");
-            System.out.println(reqBody);
-            JSONObject reqObj = new JSONObject(reqBody);
+            InputStream bodyStream = request.body;
+            bodyStream.reset();
+            String reqBody = IOUtils.toString(bodyStream, "UTF-8");
+            JSONObject activityObj = new JSONObject(reqBody).getJSONObject("activity");
 
-            int userId = reqObj.getInt("userId");
-            String dateStr = reqObj.getString("day").substring(0, 10);
+            int userId = activityObj.getInt("userId");
+            String dateStr = activityObj.getString("day").substring(0, 10);
             Date day = new SimpleDateFormat("yyyy-MM-dd").parse(dateStr);
             Exercise exercise = DatabaseUtil.getExerciseForDay(userId, day);
             if(exercise == null) { // create new exercise entry for day
                 exercise = new Exercise();
                 exercise.user = DatabaseUtil.getUser(userId);
-                exercise.caloriesBurned = reqObj.getInt("caloriesBurned");
+                exercise.caloriesBurned = activityObj.getInt("caloriesBurned");
                 exercise.day = day;
                 JPA.em().persist(exercise);
             } else { // update existing exercise entry
-                if(reqObj.getInt("caloriesBurned") == 0) {
+                if(activityObj.getInt("caloriesBurned") == 0) {
                     JPA.em().remove(exercise); // just delete exercise entry if set to 0
                 } else {
-                    exercise.caloriesBurned = reqObj.getInt("caloriesBurned");
+                    exercise.caloriesBurned = activityObj.getInt("caloriesBurned");
                 }
             }
         } catch (IOException e) {
@@ -411,9 +453,11 @@ public class EasyCal extends Controller {
 
     public static void setGoals() {
         try {
-            String reqBody = IOUtils.toString(request.body, "UTF-8");
-            JSONObject reqObj = new JSONObject(reqBody);
-            int userId = reqObj.getInt("userId");
+            InputStream bodyStream = request.body;
+            bodyStream.reset();
+            String reqBody = IOUtils.toString(bodyStream, "UTF-8");
+            JSONObject goalsObj = new JSONObject(reqBody).getJSONObject("goals");
+            int userId = goalsObj.getInt("userId");
 
             User user = JPA.em().find(User.class, userId);
             List<Goal> userGoals = user.goals;
@@ -424,17 +468,17 @@ public class EasyCal extends Controller {
 
             for(Goal.GoalCategory category : Goal.GoalCategory.values()) {
                 String categoryString = category.toString().toLowerCase();
-                if(reqObj.has(categoryString)) {
+                if(goalsObj.has(categoryString)) {
                     if(goalMap.containsKey(category)) {
                         Goal categoryGoal = goalMap.get(category);
-                        if(categoryGoal.goalValue != reqObj.getInt(categoryString)) {
-                            categoryGoal.goalValue = reqObj.getInt(categoryString);
+                        if(categoryGoal.goalValue != goalsObj.getInt(categoryString)) {
+                            categoryGoal.goalValue = goalsObj.getInt(categoryString);
                         }
                     } else {
                         Goal categoryGoal = new Goal();
                         categoryGoal.user = user;
                         categoryGoal.goalCategory = category;
-                        categoryGoal.goalValue = reqObj.getInt(categoryString);
+                        categoryGoal.goalValue = goalsObj.getInt(categoryString);
                         JPA.em().persist(categoryGoal);
                     }
                 }

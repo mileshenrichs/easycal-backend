@@ -22,9 +22,9 @@ public class DatabaseUtil {
 
     public static List<Consumption> getRecentConsumptions(int userId) {
         return JPA.em().createQuery("SELECT c FROM Consumption c " +
-                "WHERE c.id IN (SELECT MIN(c.id) FROM c GROUP BY c.foodItem)" +
+                "WHERE c.id IN (SELECT MAX(c.id) FROM c GROUP BY c.foodItem)" +
                 "AND c.user.id = :userId ORDER BY c.day DESC")
-                .setParameter("userId", userId).getResultList();
+                .setParameter("userId", userId).setMaxResults(50).getResultList();
     }
 
     public static List<Consumption> getConsumptionsInRange(int userId, Date from, Date to) {

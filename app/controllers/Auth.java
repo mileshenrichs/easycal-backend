@@ -7,7 +7,6 @@ import models.User;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 import org.mindrot.jbcrypt.BCrypt;
-import play.Play;
 import play.mvc.Controller;
 import util.DatabaseUtil;
 import util.Secret;
@@ -38,7 +37,6 @@ public class Auth extends Controller {
 
         try {
             Jwts.parser().setSigningKey(Secret.appSecret()).parseClaimsJws(token);
-
             // JWT is valid
             renderJSON(resObj.add("auth", true).build().toString());
         } catch (SignatureException e) {
