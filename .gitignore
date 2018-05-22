@@ -16,3 +16,4 @@ server.pid
 *.iws
 EasyCal Backend.iws
 Secret.java
+application.conf
