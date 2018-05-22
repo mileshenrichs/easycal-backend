@@ -14,6 +14,6 @@ server.pid
 /dist/
 .cache
 *.iws
+*.ipr
 EasyCal Backend.iws
-Secret.java
 application.conf

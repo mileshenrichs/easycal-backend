@@ -7,9 +7,9 @@ import models.User;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 import org.mindrot.jbcrypt.BCrypt;
+import play.Play;
 import play.mvc.Controller;
 import util.DatabaseUtil;
-import util.Secret;
 
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
@@ -36,7 +36,7 @@ public class Auth extends Controller {
         String token = reqObj.getString("token");
 
         try {
-            Jwts.parser().setSigningKey(Secret.appSecret()).parseClaimsJws(token);
+            Jwts.parser().setSigningKey(Play.secretKey).parseClaimsJws(token);
             // JWT is valid
             renderJSON(resObj.add("auth", true).build().toString());
         } catch (SignatureException e) {
@@ -128,7 +128,7 @@ public class Auth extends Controller {
                 .claim("userId", user.id)
                 .claim("emailAddress", user.emailAddress)
                 .setExpiration(weekFromNow)
-                .signWith(SignatureAlgorithm.HS256, Secret.appSecret())
+                .signWith(SignatureAlgorithm.HS256, Play.secretKey)
                 .compact();
     }
 

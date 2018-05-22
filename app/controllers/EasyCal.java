@@ -45,7 +45,7 @@ public class EasyCal extends Controller {
 
         if(token != null) {
             try {
-                Jwts.parser().setSigningKey(Secret.appSecret()).parseClaimsJws(token);
+                Jwts.parser().setSigningKey(Play.secretKey).parseClaimsJws(token);
                 // JWT is valid
                 authenticated = true;
             } catch (SignatureException e) {
