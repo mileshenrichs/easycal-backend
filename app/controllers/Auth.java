@@ -24,6 +24,7 @@ import java.util.Date;
 public class Auth extends Controller {
 
     public static void checkAuth() {
+        response.setHeader("Access-Control-Allow-Origin", "*");
         JsonObjectBuilder resObj = Json.createObjectBuilder();
         String reqBody = "";
         try {
@@ -46,6 +47,7 @@ public class Auth extends Controller {
     }
 
     public static void registerUser() {
+        response.setHeader("Access-Control-Allow-Origin", "*");
         JsonObjectBuilder resObj = Json.createObjectBuilder();
 
         String reqBody = "";
@@ -82,6 +84,7 @@ public class Auth extends Controller {
     }
 
     public static void logInUser() {
+        response.setHeader("Access-Control-Allow-Origin", "*");
         JsonObjectBuilder resObj = Json.createObjectBuilder();
 
         String reqBody = "";

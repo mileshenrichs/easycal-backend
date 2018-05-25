@@ -23,23 +23,15 @@ import javax.json.*;
 
 public class EasyCal extends Controller {
 
-    @Before(unless = {"searchFoods", "getFoodDetails"})
+    /**
+     * Ensure that every request is sent with a valid token as query param
+     */
+    @Before(unless = {"testEndpoint", "searchFoods", "getFoodDetails"})
     static void checkAuth() {
-        String reqBody = "";
         String token = null;
         boolean authenticated = false;
-        try {
-            reqBody = IOUtils.toString(request.body, "UTF-8");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        if(reqBody.length() > 0) {
-            JSONObject reqObj = new JSONObject(reqBody);
-            if(reqObj.has("token")) {
-                token = reqObj.getString("token");
-            }
-        } else if(params.get("token") != null) {
+        if(params.get("token") != null) {
             token = params.get("token");
         }
 
@@ -54,12 +46,14 @@ public class EasyCal extends Controller {
         }
 
         if(!authenticated) {
+            response.setHeader("Access-Control-Allow-Origin", "*");
             response.status = 403;
             renderText("");
         }
     }
 
     public static void getConsumptions(String type, int userId) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
         if(type.equals("day")) { // get consumptions for given day
             String date = request.params.get("date");
             Date day = new Date();
@@ -108,15 +102,15 @@ public class EasyCal extends Controller {
     }
 
     public static void deleteConsumption(int consumptionId) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
         response.status = DatabaseUtil.deleteConsumption(consumptionId) ? 204 : 404;
         renderText("");
     }
 
     public static void updateConsumption(int consumptionId) {
         try {
-            InputStream bodyStream = request.body;
-            bodyStream.reset();
-            String reqBody = IOUtils.toString(bodyStream, "UTF-8");
+            response.setHeader("Access-Control-Allow-Origin", "*");
+            String reqBody = IOUtils.toString(request.body, "UTF-8");
 
             JSONObject reqObj = new JSONObject(reqBody);
             int servingSizeId = reqObj.getJSONObject("consumption").getJSONObject("selectedServing")
@@ -135,6 +129,7 @@ public class EasyCal extends Controller {
 
     public static void searchFoods(String q) {
         try {
+            response.setHeader("Access-Control-Allow-Origin", "*");
             URL endpoint = new URL(
                 String.format("https://api.nal.usda.gov/ndb/search/?format=json&q=%s&sort=r&max=50&api_key=%s",
                 q, Play.configuration.getProperty("usda.apikey")));
@@ -172,6 +167,7 @@ public class EasyCal extends Controller {
 
     public static void getFoodDetails(String ndbno) {
         try {
+            response.setHeader("Access-Control-Allow-Origin", "*");
             URL endpoint = new URL(
                     String.format("https://api.nal.usda.gov/ndb/V2/reports?ndbno=%s&type=f&format=json&api_key=%s",
                             ndbno, Play.configuration.getProperty("usda.apikey")));
@@ -274,9 +270,8 @@ public class EasyCal extends Controller {
 
     public static void createNewConsumption() {
         try {
-            InputStream bodyStream = request.body;
-            bodyStream.reset();
-            String reqBody = IOUtils.toString(bodyStream, "UTF-8");
+            response.setHeader("Access-Control-Allow-Origin", "*");
+            String reqBody = IOUtils.toString(request.body, "UTF-8");
 
             JSONObject consumptionObj = new JSONObject(reqBody).getJSONObject("consumption");
             JSONObject selectedServingObj = consumptionObj.getJSONObject("selectedServing");
@@ -348,9 +343,8 @@ public class EasyCal extends Controller {
 
     public static void createFood() {
         try {
-            InputStream bodyStream = request.body;
-            bodyStream.reset();
-            String reqBody = IOUtils.toString(bodyStream, "UTF-8");
+            response.setHeader("Access-Control-Allow-Origin", "*");
+            String reqBody = IOUtils.toString(request.body, "UTF-8");
             JSONObject foodObj = new JSONObject(reqBody).getJSONObject("foodItem");
             int userId = foodObj.getInt("userId");
 
@@ -387,6 +381,7 @@ public class EasyCal extends Controller {
     }
 
     public static void getUserCreatedFoods(int userId) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
         List<FoodItem> userFoods = DatabaseUtil.getUserFoodItems(userId);
         if(userFoods.size() > 0) {
             JsonArrayBuilder arr = Json.createArrayBuilder();
@@ -401,15 +396,15 @@ public class EasyCal extends Controller {
     }
 
     public static void deleteUserCreatedFood(String id) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
         response.status = DatabaseUtil.deleteUserFoodItem(id) ? 200 : 404;
         renderText("");
     }
 
     public static void addOrUpdateExercise() {
         try {
-            InputStream bodyStream = request.body;
-            bodyStream.reset();
-            String reqBody = IOUtils.toString(bodyStream, "UTF-8");
+            response.setHeader("Access-Control-Allow-Origin", "*");
+            String reqBody = IOUtils.toString(request.body, "UTF-8");
             JSONObject activityObj = new JSONObject(reqBody).getJSONObject("activity");
 
             int userId = activityObj.getInt("userId");
@@ -438,6 +433,7 @@ public class EasyCal extends Controller {
 
     public static void getExercise(int userId, String date) {
         try {
+            response.setHeader("Access-Control-Allow-Origin", "*");
             Date day = new SimpleDateFormat("yyyy-MM-dd").parse(date);
             Exercise exercise = DatabaseUtil.getExerciseForDay(userId, day);
             int caloriesBurned = exercise != null ? exercise.caloriesBurned : 0;
@@ -453,9 +449,8 @@ public class EasyCal extends Controller {
 
     public static void setGoals() {
         try {
-            InputStream bodyStream = request.body;
-            bodyStream.reset();
-            String reqBody = IOUtils.toString(bodyStream, "UTF-8");
+            response.setHeader("Access-Control-Allow-Origin", "*");
+            String reqBody = IOUtils.toString(request.body, "UTF-8");
             JSONObject goalsObj = new JSONObject(reqBody).getJSONObject("goals");
             int userId = goalsObj.getInt("userId");
 
@@ -491,6 +486,7 @@ public class EasyCal extends Controller {
     }
 
     public static void getUserGoals(int userId) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
         List<Goal> userGoals = JPA.em().find(User.class, userId).goals;
         HashMap<Goal.GoalCategory, Goal> goalMap = new HashMap<>();
         for(Goal goal : userGoals) {
@@ -510,6 +506,7 @@ public class EasyCal extends Controller {
 
     public static void getCumulativeStatistics(int userId, String dateFrom, String dateTo) {
         try {
+            response.setHeader("Access-Control-Allow-Origin", "*");
             Date fromDay = new SimpleDateFormat("yyyy-MM-dd").parse(dateFrom.substring(0, 10));
             Date toDay = new SimpleDateFormat("yyyy-MM-dd").parse(dateTo.substring(0, 10));
             List<Consumption> consumptions = DatabaseUtil.getConsumptionsInRange(userId, fromDay, toDay);
@@ -625,6 +622,20 @@ public class EasyCal extends Controller {
             response.status = 404;
             renderText("");
         }
+    }
+
+    public static void testEndpoint() {
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        List<Consumption> recentConsumptions = DatabaseUtil.getRecentConsumptions(1);
+        Consumption mostRecent = recentConsumptions.get(0);
+        JsonObjectBuilder res = Json.createObjectBuilder()
+                .add("test", true)
+                .add("working", true)
+                .add("mostRecentConsumption", Json.createObjectBuilder()
+                        .add("id", mostRecent.id)
+                        .add("name", mostRecent.foodItem.name)
+                        .add("quantity", mostRecent.servingQuantity));
+        renderJSON(res.build().toString());
     }
 
 }

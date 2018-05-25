@@ -1,4 +1,6 @@
 # API endpoints
+GET     /api/test                               EasyCal.testEndpoint
+
 GET     /api/consumptions                       EasyCal.getConsumptions
 DELETE  /api/consumptions/{consumptionId}       EasyCal.deleteConsumption
 PUT     /api/consumptions/{consumptionId}       EasyCal.updateConsumption
