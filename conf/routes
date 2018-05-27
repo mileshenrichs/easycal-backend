@@ -1,29 +1,29 @@
 # API endpoints
-GET     /api/test                               EasyCal.testEndpoint
+GET     /api/test                                       EasyCal.testEndpoint
 
-GET     /api/consumptions                       EasyCal.getConsumptions
-POST    /api/consumptions/{consumptionId}       EasyCal.deleteConsumption
-PUT     /api/consumptions/{consumptionId}       EasyCal.updateConsumption
-POST    /api/consumptions                       EasyCal.createNewConsumption
+GET     /api/consumptions                               EasyCal.getConsumptions
+POST    /api/consumptions/{consumptionId}/delete        EasyCal.deleteConsumption
+POST    /api/consumptions/{consumptionId}               EasyCal.updateConsumption
+POST    /api/consumptions                               EasyCal.createNewConsumption
 
-GET     /api/foods                              EasyCal.searchFoods
-GET     /api/foods/{ndbno}                      EasyCal.getFoodDetails
-GET     /api/foods/user/{userId}                EasyCal.getUserCreatedFoods
-POST    /api/foods                              EasyCal.createFood
-POST    /api/foods/{id}                         EasyCal.deleteUserCreatedFood
+GET     /api/foods                                      EasyCal.searchFoods
+GET     /api/foods/{ndbno}                              EasyCal.getFoodDetails
+GET     /api/foods/user/{userId}                        EasyCal.getUserCreatedFoods
+POST    /api/foods                                      EasyCal.createFood
+POST    /api/foods/{id}                                 EasyCal.deleteUserCreatedFood
 
-GET     /api/exercise                           EasyCal.getExercise
-POST    /api/exercise                           EasyCal.addOrUpdateExercise
+GET     /api/exercise                                   EasyCal.getExercise
+POST    /api/exercise                                   EasyCal.addOrUpdateExercise
 
-POST    /api/goals                              EasyCal.setGoals
-GET     /api/goals/{userId}                     EasyCal.getUserGoals
+POST    /api/goals                                      EasyCal.setGoals
+GET     /api/goals/{userId}                             EasyCal.getUserGoals
 
-GET     /api/stats                              EasyCal.getCumulativeStatistics
+GET     /api/stats                                      EasyCal.getCumulativeStatistics
 
 # User creation & auth
-POST    /api/users/register                     Auth.registerUser
-POST    /api/users/login                        Auth.logInUser
-POST    /api/auth/check                         Auth.checkAuth
+POST    /api/users/register                             Auth.registerUser
+POST    /api/users/login                                Auth.logInUser
+POST    /api/auth/check                                 Auth.checkAuth
 
 # Catch all
-*       /{controller}/{action}                  {controller}.{action}
+*       /{controller}/{action}                          {controller}.{action}
