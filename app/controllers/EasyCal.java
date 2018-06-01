@@ -5,6 +5,7 @@ import io.jsonwebtoken.SignatureException;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import play.Logger;
 import play.Play;
 import play.db.jpa.JPA;
 import play.mvc.*;
@@ -40,8 +41,9 @@ public class EasyCal extends Controller {
                 Jwts.parser().setSigningKey(Play.secretKey).parseClaimsJws(token);
                 // JWT is valid
                 authenticated = true;
-            } catch (SignatureException e) {
+            } catch (Exception e) {
                 // invalid JWT
+                Logger.info("SignatureException: invalid JWT");
             }
         }
 
@@ -159,7 +161,11 @@ public class EasyCal extends Controller {
             }
             renderJSON(processedList.toString());
         } catch (Exception e) {
-            e.printStackTrace();
+            if(e.getMessage().equals("JSONObject[\"list\"] not found.")) {
+                Logger.info("No results found for search query");
+            } else {
+                e.printStackTrace();
+            }
             response.status = 404;
             renderText("");
         }
