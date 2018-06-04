@@ -21,7 +21,7 @@ All models reside in `app/models/`.
 * __Consumption__: records the event of a __User__ (_FK user_id_) adding a __FoodItem__ (_FK food_item_id_) to his/her log for a given meal on a given day
 * __ServingSize__: represents a type of serving (i.e. cup, oz, slice). The USDA database standardizes nutrition info in terms of 100 gram servings, so the _ratio_ field indicates the serving size's ratio to this standard.  For example, one cup of shredded cheddar cheese weighs 113 grams, so its ratio is represented as 1.13
 * __ServingLabel__: some serving size names will appear very frequently (like cup, oz, slice, and piece), so this serves as a lookup table for just these labels.  At a larger scale, this would prevent excessive duplication of serving label strings in the __ServingSize__ table
-* __CreatedFood__: created_food is a join table that relates created __FoodItems__ (_FK food_item_id_) to the __Users__ (_FK user_id_) them
+* __CreatedFood__: created_food is a join table that relates created __FoodItems__ (_FK food_item_id_) to the __Users__ (_FK user_id_) who create them
 * __Exercise__: describes the amount of calories a __User__ (_FK user_id_) burned on a given day
 * __Goals__: each goal is an amount of a nutrient or a calorie value that a user wishes to reach every day.  The goal_category field is an ordinal reference to the `app/models/Goal.GoalCategory` enum whose values consist of: `CALORIES, CARBS, FAT, PROTEIN, FIBER, SUGAR, SODIUM`
 
