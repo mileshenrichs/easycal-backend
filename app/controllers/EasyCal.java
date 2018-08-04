@@ -419,6 +419,32 @@ public class EasyCal extends Controller {
         renderJSON(mealGroupsJson);
     }
 
+    public static void updateFoodMealGroup(String body) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        Gson gson = new Gson();
+        FoodMealGroup updatedMealGroup = gson.fromJson(body, new TypeToken<FoodMealGroup>(){}.getType());
+
+        // clear out all previous food items
+        FoodMealGroup originalMealGroup = JPA.em().find(FoodMealGroup.class, updatedMealGroup.id);
+        for(FoodMealGroupItem foodItem : originalMealGroup.mealGroupItems) {
+            JPA.em().remove(foodItem);
+        }
+
+        // rebuild based on updated group
+        for(int i = 0; i < updatedMealGroup.mealGroupItems.size(); i++) {
+            FoodMealGroupItem newFoodItem = updatedMealGroup.mealGroupItems.get(i);
+            FoodItem correspondingFoodItem = JPA.em().find(FoodItem.class, newFoodItem.foodItem.id);
+            ServingSize correspondingDefaultServingSize = JPA.em().find(ServingSize.class, newFoodItem.defaultServingSize.id);
+
+            newFoodItem.id = null;
+            newFoodItem.foodMealGroup = originalMealGroup;
+            newFoodItem.foodItem = correspondingFoodItem;
+            newFoodItem.defaultServingSize = correspondingDefaultServingSize;
+            JPA.em().persist(newFoodItem);
+        }
+        ok();
+    }
+
     public static void addOrUpdateExercise() {
         try {
             response.setHeader("Access-Control-Allow-Origin", "*");

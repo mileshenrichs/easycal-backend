@@ -14,7 +14,7 @@ public class FoodMealGroupItem {
     @Id
     @GeneratedValue
     @Expose
-    public int id;
+    public Integer id;
 
     @ManyToOne
     @JoinColumn(name = "food_meal_group_id")
