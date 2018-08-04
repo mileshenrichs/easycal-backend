@@ -12,6 +12,8 @@ GET     /api/foods/user/{userId}                        EasyCal.getUserCreatedFo
 POST    /api/foods                                      EasyCal.createFood
 POST    /api/foods/{id}                                 EasyCal.deleteUserCreatedFood
 
+GET     /api/food-meal-groups/user/{userId}             EasyCal.getUserFoodMealGroups
+
 GET     /api/exercise                                   EasyCal.getExercise
 POST    /api/exercise                                   EasyCal.addOrUpdateExercise
 

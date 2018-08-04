@@ -105,6 +105,12 @@ public class DatabaseUtil {
         return false;
     }
 
+    public static List<FoodMealGroup> getUserFoodMealGroups(int userId) {
+        User user = getUser(userId);
+        return JPA.em().createQuery("SELECT fmg FROM FoodMealGroup fmg " +
+                "WHERE fmg.user = :user").setParameter("user", user).getResultList();
+    }
+
     public static Exercise getExerciseForDay(int userId, Date day) {
         User user = JPA.em().find(User.class, userId);
         List<Exercise> exercises = JPA.em().createQuery("SELECT e FROM Exercise e " +

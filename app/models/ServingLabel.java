@@ -1,5 +1,7 @@
 package models;
 
+import com.google.gson.annotations.Expose;
+
 import javax.persistence.*;
 import java.util.List;
 
@@ -12,9 +14,11 @@ public class ServingLabel {
 
     @Id
     @GeneratedValue
+    @Expose
     public int id;
 
     @Column(name = "label_value")
+    @Expose
     public String labelValue;
 
     @OneToMany(mappedBy = "label")

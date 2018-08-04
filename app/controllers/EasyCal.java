@@ -1,5 +1,8 @@
 package controllers;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureException;
 import org.apache.commons.io.IOUtils;
@@ -407,6 +410,15 @@ public class EasyCal extends Controller {
         renderText("");
     }
 
+    public static void getUserFoodMealGroups(int userId) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        List<FoodMealGroup> userMealGroups = DatabaseUtil.getUserFoodMealGroups(userId);
+
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+        String mealGroupsJson = gson.toJson(userMealGroups);
+        renderJSON(mealGroupsJson);
+    }
+
     public static void addOrUpdateExercise() {
         try {
             response.setHeader("Access-Control-Allow-Origin", "*");
@@ -430,9 +442,7 @@ public class EasyCal extends Controller {
                     exercise.caloriesBurned = activityObj.getInt("caloriesBurned");
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
+        } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
     }

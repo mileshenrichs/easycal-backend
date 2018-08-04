@@ -1,5 +1,7 @@
 package models;
 
+import com.google.gson.annotations.Expose;
+
 import javax.persistence.*;
 import java.util.List;
 
@@ -12,6 +14,7 @@ public class ServingSize {
 
     @Id
     @GeneratedValue
+    @Expose
     public int id;
 
     @JoinColumn(name = "food_item_id")
@@ -20,12 +23,17 @@ public class ServingSize {
 
     @JoinColumn(name = "label_id")
     @ManyToOne
+    @Expose
     public ServingLabel label;
 
+    @Expose
     public double ratio;
 
     @OneToMany(mappedBy = "servingSize")
     public List<Consumption> consumptions;
+
+    @OneToMany(mappedBy = "defaultServingSize")
+    public List<FoodMealGroupItem> mealGroupItems;
 
     public ServingSize() {}
 }
