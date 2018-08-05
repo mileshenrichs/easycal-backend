@@ -410,6 +410,17 @@ public class EasyCal extends Controller {
         renderText("");
     }
 
+    public static void getFoodMealGroup(int foodMealGroupId) {
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+        FoodMealGroup foodMealGroup = DatabaseUtil.getFoodMealGroupById(foodMealGroupId);
+        if(foodMealGroup == null) {
+            response.status = 404;
+            renderText("");
+        } else {
+            renderJSON(gson.toJson(foodMealGroup, new TypeToken<FoodMealGroup>(){}.getType()));
+        }
+    }
+
     public static void getUserFoodMealGroups(int userId) {
         response.setHeader("Access-Control-Allow-Origin", "*");
         List<FoodMealGroup> userMealGroups = DatabaseUtil.getUserFoodMealGroups(userId);
@@ -417,6 +428,23 @@ public class EasyCal extends Controller {
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
         String mealGroupsJson = gson.toJson(userMealGroups);
         renderJSON(mealGroupsJson);
+    }
+
+    public static void addFoodToMealGroup(String body, int foodMealGroupId) {
+        JSONObject reqObj = new JSONObject(body);
+
+        String foodItemId = reqObj.getString("foodItemId");
+        int servingSizeId = reqObj.getInt("selectedServingSizeId");
+        double servingQuantity = reqObj.getDouble("servingQuantity");
+
+        FoodMealGroupItem newMealGroupItem = new FoodMealGroupItem();
+        newMealGroupItem.foodMealGroup = DatabaseUtil.getFoodMealGroupById(foodMealGroupId);
+        newMealGroupItem.foodItem = DatabaseUtil.getFoodItem(foodItemId);
+        newMealGroupItem.defaultServingSize = DatabaseUtil.getServingSize(servingSizeId);
+        newMealGroupItem.defaultServingQuantity = servingQuantity;
+        JPA.em().persist(newMealGroupItem);
+
+        ok();
     }
 
     public static void updateFoodMealGroup(String body) {

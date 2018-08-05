@@ -105,6 +105,10 @@ public class DatabaseUtil {
         return false;
     }
 
+    public static FoodMealGroup getFoodMealGroupById(int foodMealGroupId) {
+        return JPA.em().find(FoodMealGroup.class, foodMealGroupId);
+    }
+
     public static List<FoodMealGroup> getUserFoodMealGroups(int userId) {
         User user = getUser(userId);
         return JPA.em().createQuery("SELECT fmg FROM FoodMealGroup fmg " +
