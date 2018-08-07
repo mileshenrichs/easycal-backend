@@ -1,6 +1,8 @@
 package util;
 
 import models.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import play.db.jpa.JPA;
 
 import javax.persistence.EntityManager;
@@ -103,6 +105,49 @@ public class DatabaseUtil {
             return true;
         }
         return false;
+    }
+
+    public static CreatedFoodItemWithSelectedServing createNewFoodItem(JSONObject foodItemObj) {
+        // create food item
+        FoodItem foodItem = new FoodItem();
+        foodItem.id = foodItemObj.getString("foodItemId");
+        foodItem.name = foodItemObj.getString("name");
+        foodItem.calories = foodItemObj.getDouble("calories");
+        foodItem.carbs = foodItemObj.getDouble("carbs");
+        foodItem.fat = foodItemObj.getDouble("fat");
+        foodItem.protein = foodItemObj.getDouble("protein");
+        foodItem.fiber = foodItemObj.getDouble("fiber");
+        foodItem.sugar = foodItemObj.getDouble("sugar");
+        foodItem.sodium = foodItemObj.getDouble("sodium");
+        JPA.em().persist(foodItem);
+
+        int selectedServingId = -1;
+
+        // create serving size entities
+        JSONArray servingSizesArr = foodItemObj.getJSONArray("servingSizes");
+        for(int i = 0; i < servingSizesArr.length(); i++) {
+            JSONObject servingObj = servingSizesArr.getJSONObject(i);
+            String servingLabelString = servingObj.getString("label");
+            ServingLabel servingLabel = DatabaseUtil.getServingLabelByValue(servingLabelString);
+            if(servingLabel == null) {
+                servingLabel = new ServingLabel();
+                servingLabel.labelValue = servingLabelString;
+                JPA.em().persist(servingLabel);
+            }
+
+            ServingSize servingSize = new ServingSize();
+            servingSize.foodItem = foodItem;
+            servingSize.label = servingLabel;
+            servingSize.ratio = servingObj.getDouble("ratio");
+            JPA.em().persist(servingSize);
+
+            // set selectedServingId only if given serving size was selected
+            JSONObject selectedServingObj = foodItemObj.getJSONObject("selectedServing");
+            if(selectedServingObj.getJSONObject("servingSize").getInt("id") == i) {
+                selectedServingId = servingSize.id;
+            }
+        }
+        return new CreatedFoodItemWithSelectedServing(foodItem, selectedServingId);
     }
 
     public static FoodMealGroup getFoodMealGroupById(int foodMealGroupId) {

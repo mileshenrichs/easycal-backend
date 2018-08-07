@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureException;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,6 +23,7 @@ import models.*;
 import util.*;
 
 import javax.json.*;
+import javax.xml.crypto.Data;
 
 public class EasyCal extends Controller {
 
@@ -284,47 +284,15 @@ public class EasyCal extends Controller {
 
             JSONObject consumptionObj = new JSONObject(reqBody).getJSONObject("consumption");
             JSONObject selectedServingObj = consumptionObj.getJSONObject("selectedServing");
-            int selectedServingId = -1;
+            int selectedServingId;
 
             // get corresponding food item
             FoodItem foodItem = DatabaseUtil.getFoodItem(consumptionObj.getString("foodItemId"));
 
             if(foodItem == null) {
-                // create food item if doesn't exist
-                foodItem = new FoodItem();
-                foodItem.id = consumptionObj.getString("foodItemId");
-                foodItem.name = consumptionObj.getString("name");
-                foodItem.calories = consumptionObj.getDouble("calories");
-                foodItem.carbs = consumptionObj.getDouble("carbs");
-                foodItem.fat = consumptionObj.getDouble("fat");
-                foodItem.protein = consumptionObj.getDouble("protein");
-                foodItem.fiber = consumptionObj.getDouble("fiber");
-                foodItem.sugar = consumptionObj.getDouble("sugar");
-                foodItem.sodium = consumptionObj.getDouble("sodium");
-                JPA.em().persist(foodItem);
-
-                // create serving size entities
-                JSONArray servingSizesArr = consumptionObj.getJSONArray("servingSizes");
-                for(int i = 0; i < servingSizesArr.length(); i++) {
-                    JSONObject servingObj = servingSizesArr.getJSONObject(i);
-                    String servingLabelString = servingObj.getString("label");
-                    ServingLabel servingLabel = DatabaseUtil.getServingLabelByValue(servingLabelString);
-                    if(servingLabel == null) {
-                        servingLabel = new ServingLabel();
-                        servingLabel.labelValue = servingLabelString;
-                        JPA.em().persist(servingLabel);
-                    }
-
-                    ServingSize servingSize = new ServingSize();
-                    servingSize.foodItem = foodItem;
-                    servingSize.label = servingLabel;
-                    servingSize.ratio = servingObj.getDouble("ratio");
-                    JPA.em().persist(servingSize);
-                    // set selectedServingId only if given serving size was selected
-                    if(selectedServingObj.getJSONObject("servingSize").getInt("id") == i) {
-                        selectedServingId = servingSize.id;
-                    }
-                }
+                CreatedFoodItemWithSelectedServing created = DatabaseUtil.createNewFoodItem(consumptionObj);
+                foodItem = created.foodItem;
+                selectedServingId = created.selectedServingSizeId;
             } else {
                 selectedServingId = DatabaseUtil.findServingSizeId(foodItem,
                         selectedServingObj.getJSONObject("servingSize").getString("label"));
@@ -332,11 +300,9 @@ public class EasyCal extends Controller {
 
             // create consumption
             Consumption consumption = new Consumption();
-            User user = DatabaseUtil.getUser(consumptionObj.getInt("userId"));
-            consumption.user = user;
+            consumption.user = DatabaseUtil.getUser(consumptionObj.getInt("userId"));
             consumption.foodItem = foodItem;
-            ServingSize servingSize = DatabaseUtil.getServingSize(selectedServingId);
-            consumption.servingSize = servingSize;
+            consumption.servingSize = DatabaseUtil.getServingSize(selectedServingId);
             consumption.servingQuantity = selectedServingObj.getDouble("quantity");
             consumption.meal = Meal.valueOf(consumptionObj.getString("meal").toUpperCase());
             String day = consumptionObj.getString("day");
@@ -411,6 +377,7 @@ public class EasyCal extends Controller {
     }
 
     public static void getFoodMealGroup(int foodMealGroupId) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
         FoodMealGroup foodMealGroup = DatabaseUtil.getFoodMealGroupById(foodMealGroupId);
         if(foodMealGroup == null) {
@@ -431,15 +398,23 @@ public class EasyCal extends Controller {
     }
 
     public static void addFoodToMealGroup(String body, int foodMealGroupId) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
         JSONObject reqObj = new JSONObject(body);
 
-        String foodItemId = reqObj.getString("foodItemId");
+        String foodItemId = reqObj.getJSONObject("foodItem").getString("foodItemId");
         int servingSizeId = reqObj.getInt("selectedServingSizeId");
         double servingQuantity = reqObj.getDouble("servingQuantity");
 
+        FoodItem foodItem = DatabaseUtil.getFoodItem(foodItemId);
+        if(foodItem == null) {
+            CreatedFoodItemWithSelectedServing created = DatabaseUtil.createNewFoodItem(reqObj.getJSONObject("foodItem"));
+            foodItem = created.foodItem;
+            servingSizeId = created.selectedServingSizeId;
+        }
+
         FoodMealGroupItem newMealGroupItem = new FoodMealGroupItem();
         newMealGroupItem.foodMealGroup = DatabaseUtil.getFoodMealGroupById(foodMealGroupId);
-        newMealGroupItem.foodItem = DatabaseUtil.getFoodItem(foodItemId);
+        newMealGroupItem.foodItem = foodItem;
         newMealGroupItem.defaultServingSize = DatabaseUtil.getServingSize(servingSizeId);
         newMealGroupItem.defaultServingQuantity = servingQuantity;
         JPA.em().persist(newMealGroupItem);
