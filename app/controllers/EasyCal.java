@@ -388,6 +388,24 @@ public class EasyCal extends Controller {
         }
     }
 
+    public static void createNewFoodMealGroup(int userId) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        FoodMealGroup foodMealGroup = new FoodMealGroup();
+        foodMealGroup.user = DatabaseUtil.getUser(userId);
+        foodMealGroup.name = "";
+        foodMealGroup.mealGroupItems = new ArrayList<>();
+        JPA.em().persist(foodMealGroup);
+
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+        renderJSON(gson.toJson(foodMealGroup, new TypeToken<FoodMealGroup>(){}.getType()));
+    }
+
+    public static void updateFoodMealGroupName(int foodMealGroupId, String newName) {
+        FoodMealGroup foodMealGroup = DatabaseUtil.getFoodMealGroupById(foodMealGroupId);
+        foodMealGroup.name = newName;
+        ok();
+    }
+
     public static void getUserFoodMealGroups(int userId) {
         response.setHeader("Access-Control-Allow-Origin", "*");
         List<FoodMealGroup> userMealGroups = DatabaseUtil.getUserFoodMealGroups(userId);
