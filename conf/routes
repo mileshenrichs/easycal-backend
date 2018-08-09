@@ -3,6 +3,7 @@ GET     /api/test                                       EasyCal.testEndpoint
 
 GET     /api/consumptions                               EasyCal.getConsumptions
 POST    /api/consumptions/{consumptionId}/delete        EasyCal.deleteConsumption
+POST    /api/consumptions/food-meal-group               EasyCal.createMealGroupConsumptions
 POST    /api/consumptions/{consumptionId}               EasyCal.updateConsumption
 POST    /api/consumptions                               EasyCal.createNewConsumption
 

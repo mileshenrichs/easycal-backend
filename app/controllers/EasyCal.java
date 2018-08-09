@@ -355,6 +355,33 @@ public class EasyCal extends Controller {
         renderText("");
     }
 
+    public static void createMealGroupConsumptions(String body) {
+        try {
+            response.setHeader("Access-Control-Allow-Origin", "*");
+            JSONObject consumptionObj = new JSONObject(body).getJSONObject("consumption");
+            FoodMealGroup mealGroup = DatabaseUtil.getFoodMealGroupById(consumptionObj.getInt("mealGroupId"));
+            User user = DatabaseUtil.getUser(consumptionObj.getInt("userId"));
+            String day = consumptionObj.getString("day");
+
+            // create consumptions for each of the meal group's food items
+            for(FoodMealGroupItem groupFoodItem : mealGroup.mealGroupItems) {
+                Consumption consumption = new Consumption();
+                consumption.user = user;
+                consumption.day = new SimpleDateFormat("yyyy-MM-dd").parse(day);
+                consumption.meal = Meal.valueOf(consumptionObj.getString("meal").toUpperCase());
+                consumption.foodItem = groupFoodItem.foodItem;
+                consumption.servingSize = groupFoodItem.defaultServingSize;
+                consumption.servingQuantity = groupFoodItem.defaultServingQuantity;
+                JPA.em().persist(consumption);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.status = 404;
+        } finally {
+            renderText("");
+        }
+    }
+
     public static void getUserCreatedFoods(int userId) {
         response.setHeader("Access-Control-Allow-Origin", "*");
         List<FoodItem> userFoods = DatabaseUtil.getUserFoodItems(userId);
