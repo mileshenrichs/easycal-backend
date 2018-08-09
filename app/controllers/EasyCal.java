@@ -466,6 +466,18 @@ public class EasyCal extends Controller {
         ok();
     }
 
+    public static void deleteFoodMealGroup(int foodMealGroupId) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        FoodMealGroup foodMealGroup = DatabaseUtil.getFoodMealGroupById(foodMealGroupId);
+        if(foodMealGroup != null) {
+            JPA.em().remove(foodMealGroup);
+            response.status = 204;
+            renderText("");
+        } else {
+            notFound();
+        }
+    }
+
     public static void addOrUpdateExercise() {
         try {
             response.setHeader("Access-Control-Allow-Origin", "*");

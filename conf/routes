@@ -18,6 +18,7 @@ POST    /api/food-meal-groups/update                    EasyCal.updateFoodMealGr
 POST    /api/food-meal-groups/{foodMealGroupId}         EasyCal.updateFoodMealGroupName
 GET     /api/food-meal-groups/user/{userId}             EasyCal.getUserFoodMealGroups
 POST    /api/food-meal-groups/{foodMealGroupId}/add     EasyCal.addFoodToMealGroup
+POST    /api/food-meal-groups/{foodMealGroupId}/delete  EasyCal.deleteFoodMealGroup
 
 GET     /api/exercise                                   EasyCal.getExercise
 POST    /api/exercise                                   EasyCal.addOrUpdateExercise
