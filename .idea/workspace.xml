@@ -2,16 +2,22 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4e0c97fd-ed31-4502-afa5-1429f323af3f" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/easycal-backend.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/easycal-backend.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/EasyCal Backend.iml" beforeDir="false" afterPath="$PROJECT_DIR$/EasyCal Backend.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/conf/dependencies.yml" beforeDir="false" afterPath="$PROJECT_DIR$/conf/dependencies.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/controllers/EasyCal.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/EasyCal.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -33,6 +39,9 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="project.structure.last.edited" value="Project" />
+    <property name="project.structure.proportion" value="0.0" />
+    <property name="project.structure.side.proportion" value="0.2" />
   </component>
   <component name="RunManager">
     <configuration default="true" type="AndroidTestRunConfigurationType" factoryName="Android Tests">
@@ -167,6 +176,10 @@
       <option name="HOST" value="localhost" />
       <option name="PORT" value="8000" />
       <option name="AUTO_RESTART" value="false" />
+      <RunnerSettings RunnerId="Debug">
+        <option name="DEBUG_PORT" value="8000" />
+        <option name="LOCAL" value="false" />
+      </RunnerSettings>
       <method v="2" />
     </configuration>
     <configuration default="true" type="TestNG">
@@ -208,7 +221,7 @@
       <option name="presentableId" value="Default" />
       <updated>1523917292606</updated>
       <workItem from="1523917294111" duration="685000" />
-      <workItem from="1597504657512" duration="6249000" />
+      <workItem from="1597504657512" duration="8679000" />
     </task>
     <servers />
   </component>
@@ -216,14 +229,61 @@
     <option name="version" value="2" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="760" y="108" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1597505854760">
+    <state x="760" y="108" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1597556767060">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="760" y="108" key="#com.intellij.execution.impl.EditConfigurationsDialog/-1920.290.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1597505854760" />
+    <state x="760" y="108" key="#com.intellij.execution.impl.EditConfigurationsDialog/-1920.290.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1597556767060" />
+    <state width="1877" height="348" key="GridCell.Tab.0.bottom" timestamp="1597596505033">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="348" key="GridCell.Tab.0.bottom/-1920.290.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1597596505033" />
+    <state width="1877" height="348" key="GridCell.Tab.0.center" timestamp="1597596505033">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="348" key="GridCell.Tab.0.center/-1920.290.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1597596505033" />
+    <state width="1877" height="348" key="GridCell.Tab.0.left" timestamp="1597596505032">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="348" key="GridCell.Tab.0.left/-1920.290.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1597596505032" />
+    <state width="1877" height="348" key="GridCell.Tab.0.right" timestamp="1597596505033">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="348" key="GridCell.Tab.0.right/-1920.290.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1597596505033" />
+    <state width="1877" height="348" key="GridCell.Tab.1.bottom" timestamp="1597596550522">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="348" key="GridCell.Tab.1.bottom/-1920.290.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1597596550522" />
+    <state width="1877" height="348" key="GridCell.Tab.1.center" timestamp="1597596550522">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="348" key="GridCell.Tab.1.center/-1920.290.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1597596550522" />
+    <state width="1877" height="348" key="GridCell.Tab.1.left" timestamp="1597596550522">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="348" key="GridCell.Tab.1.left/-1920.290.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1597596550522" />
+    <state width="1877" height="348" key="GridCell.Tab.1.right" timestamp="1597596550522">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="348" key="GridCell.Tab.1.right/-1920.290.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1597596550522" />
     <state width="196" height="457" key="HiddenNamespacesPopup" timestamp="1597505692719">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="196" height="457" key="HiddenNamespacesPopup/-1920.290.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1597505692719" />
+    <state x="440" y="94" key="SettingsEditor" timestamp="1597557425919">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="440" y="94" key="SettingsEditor/-1920.290.1920.1040/0.0.1920.1040@0.0.1920.1040" timestamp="1597557425919" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/controllers/EasyCal.java</url>
+          <line>136</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="antWorkspaceConfiguration">
     <option name="IS_AUTOSCROLL_TO_SOURCE" value="false" />

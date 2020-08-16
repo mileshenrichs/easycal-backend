@@ -135,40 +135,23 @@ public class EasyCal extends Controller {
     public static void searchFoods(String q) {
         try {
             response.setHeader("Access-Control-Allow-Origin", "*");
-            URL endpoint = new URL(
-                String.format("https://api.nal.usda.gov/ndb/search/?format=json&q=%s&sort=r&max=50&api_key=%s",
-                q, Play.configuration.getProperty("usda.apikey")));
-            HttpURLConnection con = (HttpURLConnection) endpoint.openConnection();
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            String inputLine;
-            StringBuffer res = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                res.append(inputLine);
-            }
-            in.close();
-
-            JSONObject resObj = new JSONObject(res.toString());
-            JSONArray resArr = resObj.getJSONObject("list").getJSONArray("item");
+            JSONObject resObj = UsdaApiClient.getFoodSearchResponse(q);
+            JSONArray resArr = resObj.getJSONArray("foods");
 
             JSONArray processedList = new JSONArray();
             for(int i = 0; i < resArr.length() && processedList.length() <= 40; i++) {
                 JSONObject item = resArr.getJSONObject(i);
-                String itemName = StringUtil.formatFoodItemName(item.getString("name"));
+                String itemName = StringUtil.formatFoodItemName(item.getString("description"));
                 // filter out items with super long names
                 if(itemName.length() <= 80) {
                     processedList.put(new JSONObject()
                             .put("name", itemName)
-                            .put("foodItemId", item.getString("ndbno")));
+                            .put("foodItemId", String.valueOf(item.getInt("fdcId"))));
                 }
             }
             renderJSON(processedList.toString());
         } catch (Exception e) {
-            if(e.getMessage().equals("JSONObject[\"list\"] not found.")) {
-                Logger.info("No results found for search query");
-            } else {
-                e.printStackTrace();
-            }
+            e.printStackTrace();
             response.status = 404;
             renderText("");
         }
