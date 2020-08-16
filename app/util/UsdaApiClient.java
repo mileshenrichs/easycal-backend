@@ -17,4 +17,10 @@ public class UsdaApiClient {
                         query, DATA_TYPE_LIST, Play.configuration.getProperty("fooddata.apikey")));
         return new JSONObject(HttpUtil.get(endpoint));
     }
+
+    public static JSONObject getFoodDetailsResponse(int fdcId) throws IOException {
+        URL endpoint = new URL(String.format("https://api.nal.usda.gov/fdc/v1/food/%d?api_key=%s",
+                fdcId, Play.configuration.getProperty("fooddata.apikey")));
+        return new JSONObject(HttpUtil.get(endpoint));
+    }
 }

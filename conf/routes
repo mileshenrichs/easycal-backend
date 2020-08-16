@@ -8,7 +8,7 @@ POST    /api/consumptions/{consumptionId}               EasyCal.updateConsumptio
 POST    /api/consumptions                               EasyCal.createNewConsumption
 
 GET     /api/foods                                      EasyCal.searchFoods
-GET     /api/foods/{ndbno}                              EasyCal.getFoodDetails
+GET     /api/foods/{fdcId}                              EasyCal.getFoodDetails
 GET     /api/foods/user/{userId}                        EasyCal.getUserCreatedFoods
 POST    /api/foods                                      EasyCal.createFood
 POST    /api/foods/{id}                                 EasyCal.deleteUserCreatedFood

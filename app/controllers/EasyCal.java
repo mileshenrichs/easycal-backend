@@ -13,8 +13,6 @@ import play.db.jpa.JPA;
 import play.mvc.*;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -157,99 +155,14 @@ public class EasyCal extends Controller {
         }
     }
 
-    public static void getFoodDetails(String ndbno) {
+    public static void getFoodDetails(int fdcId) {
         try {
             response.setHeader("Access-Control-Allow-Origin", "*");
-            URL endpoint = new URL(
-                    String.format("https://api.nal.usda.gov/ndb/V2/reports?ndbno=%s&type=f&format=json&api_key=%s",
-                            ndbno, Play.configuration.getProperty("usda.apikey")));
-            HttpURLConnection con = (HttpURLConnection) endpoint.openConnection();
+            JSONObject foodObj = UsdaApiClient.getFoodDetailsResponse(fdcId);
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            String inputLine;
-            StringBuffer res = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                res.append(inputLine);
-            }
-            in.close();
-
-            JSONObject resObj = new JSONObject(res.toString());
-            JSONObject foodObj = resObj.getJSONArray("foods").getJSONObject(0).getJSONObject("food");
-
-            String foodItemId = foodObj.getJSONObject("desc").getString("ndbno");
-            String name = StringUtil.formatFoodItemName(foodObj.getJSONObject("desc").getString("name"));
-            JSONArray nutrientsArr = foodObj.getJSONArray("nutrients");
-
-            // get list of serving sizes
-            JSONArray measuresArr = nutrientsArr.getJSONObject(0).getJSONArray("measures");
-            List<ServingSize> servingSizes = new ArrayList<>();
-
-            // make sure there are actually measures provided
-            if(measuresArr.length() > 0) {
-                for(int i = 0; i < measuresArr.length(); i++) {
-                    JSONObject servingObj = measuresArr.getJSONObject(i);
-                    ServingLabel label = new ServingLabel();
-                    label.labelValue = StringUtil.formatServingSizeLabel(servingObj.getString("label"));
-                    ServingSize servingSize = new ServingSize();
-                    servingSize.label = label;
-                    servingSize.ratio = (double) servingObj.getInt("eqv") / 100;
-                    servingSizes.add(servingSize);
-                }
-            } else { // create default 100 g measure
-                ServingSize servingSize = new ServingSize();
-                servingSize.label = JPA.em().find(ServingLabel.class, 28); // 28 is id of "g" serving label
-                servingSize.ratio = 0.01;
-                servingSizes.add(servingSize);
-            }
-
-            // get nutrition information
-            HashMap<String, Double> nutritionMap = new HashMap<>();
-            nutritionMap.put("carbs", -1.0);
-            nutritionMap.put("fat", -1.0);
-            nutritionMap.put("protein", -1.0);
-            nutritionMap.put("fiber", -1.0);
-            nutritionMap.put("sugar", -1.0);
-            nutritionMap.put("sodium", -1.0);
-            int i = 0;
-            while(InfoUtil.containsNegative(new double[]
-                    {nutritionMap.get("carbs"), nutritionMap.get("fat"), nutritionMap.get("protein"),
-                    nutritionMap.get("fiber"), nutritionMap.get("sugar"), nutritionMap.get("sodium")})) {
-                JSONObject nutrientObj = nutrientsArr.getJSONObject(i);
-                switch(nutrientObj.getString("name")) {
-                    case "Carbohydrate, by difference":
-                        nutritionMap.put("carbs", nutrientObj.getDouble("value"));
-                        break;
-                    case "Total lipid (fat)":
-                        nutritionMap.put("fat", nutrientObj.getDouble("value"));
-                        break;
-                    case "Protein":
-                        nutritionMap.put("protein", nutrientObj.getDouble("value"));
-                        break;
-                    case "Fiber, total dietary":
-                        nutritionMap.put("fiber", nutrientObj.getDouble("value"));
-                        break;
-                    case "Sugars, total":
-                        nutritionMap.put("sugar", nutrientObj.getDouble("value"));
-                        break;
-                    case "Sodium, Na":
-                        nutritionMap.put("sodium", nutrientObj.getDouble("value"));
-                        break;
-                }
-                i++;
-                // if don't have values for some nutrient(s), set all default -1.0 values to 0
-                if(i == nutrientsArr.length()) {
-                    for(String nutrient : nutritionMap.keySet()) {
-                        if(nutritionMap.get(nutrient) < 0) {
-                            nutritionMap.put(nutrient, 0.0);
-                        }
-                    }
-                }
-            }
-            // calculate calories from macros (database is often inaccurate)
-            double calories = InfoUtil.calculateCalories(nutritionMap.get("carbs"), nutritionMap.get("fat"), nutritionMap.get("protein"));
-            FoodItem foodItem = new FoodItem(foodItemId, name, servingSizes,
-                    calories, nutritionMap.get("carbs"), nutritionMap.get("fat"),
-                    nutritionMap.get("protein"), nutritionMap.get("fiber"), nutritionMap.get("sugar"), nutritionMap.get("sodium"));
+            FoodDetailsExtractorFactory foodDetailsExtractorFactory = new FoodDetailsExtractorFactory();
+            FoodDetailsExtractor foodDetailsExtractor = foodDetailsExtractorFactory.getExtractorForFoodDetails(foodObj);
+            FoodItem foodItem = foodDetailsExtractor.extract(foodObj);
             JsonObjectBuilder item = JSONUtil.buildMealItem(foodItem);
 
             renderJSON(item.build().toString());
