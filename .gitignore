@@ -18,3 +18,4 @@ server.pid
 EasyCal Backend.iws
 application.conf
 precompiled/
+.idea
