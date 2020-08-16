@@ -26,8 +26,6 @@ public class StringUtil {
         int cutoffIndex = label.length();
         if(label.contains("|")) {
             cutoffIndex = label.indexOf("|") - 1;
-        } else if(label.contains(",")) {
-            cutoffIndex = label.indexOf(",");
         }
         label = label.substring(0, cutoffIndex);
         return label;
@@ -37,9 +35,9 @@ public class StringUtil {
         Pattern gramsPattern = Pattern.compile("m*g");
         Matcher gramsMatcher = gramsPattern.matcher(nutrient);
         if(gramsMatcher.find()) {
-            return Double.valueOf(nutrient.substring(0, gramsMatcher.start()));
+            return Double.parseDouble(nutrient.substring(0, gramsMatcher.start()));
         } else {
-            return Double.valueOf(nutrient);
+            return Double.parseDouble(nutrient);
         }
     }
 
@@ -54,7 +52,7 @@ public class StringUtil {
     }
 
     public static UserServingSize processServingSizeString(String servingSize) {
-        double amount = Double.valueOf(servingSize.substring(0, servingSize.indexOf(" ")));
+        double amount = Double.parseDouble(servingSize.substring(0, servingSize.indexOf(" ")));
         String label = servingSize.substring(servingSize.indexOf(" ") + 1);
         return new UserServingSize(amount, label);
     }

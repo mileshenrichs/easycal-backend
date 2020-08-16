@@ -7,7 +7,10 @@ public class FoodDetailsExtractorFactory {
         switch(foodObj.getString("dataType")) {
             case "Branded":
                 return new BrandedFoodDetailsExtractor();
+            case "Survey (FNDDS)":
+                return new SurveyFoodDetailsExtractor();
+            default:
+                return new SRLegacyFoodDetailsExtractor();
         }
-        return null;
     }
 }
