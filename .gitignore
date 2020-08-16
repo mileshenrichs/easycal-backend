@@ -19,3 +19,4 @@ EasyCal Backend.iws
 application.conf
 precompiled/
 .idea
+.ideaDataSources
