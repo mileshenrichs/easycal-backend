@@ -5,6 +5,8 @@ import play.Play;
 
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 /** A client which facilitates requests made to the FoodData (formerly USDA Food Composition) database API. */
 public class UsdaApiClient {
@@ -12,9 +14,10 @@ public class UsdaApiClient {
     private static final String DATA_TYPE_LIST = "Branded,SR%20Legacy,Survey%20(FNDDS)";
 
     public static JSONObject getFoodSearchResponse(String query) throws IOException {
+        String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString());
         URL endpoint = new URL(
                 String.format("https://api.nal.usda.gov/fdc/v1/foods/search?query=%s&dataType=%s&api_key=%s",
-                        query, DATA_TYPE_LIST, Play.configuration.getProperty("fooddata.apikey")));
+                        encodedQuery, DATA_TYPE_LIST, Play.configuration.getProperty("fooddata.apikey")));
         return new JSONObject(HttpUtil.get(endpoint));
     }
 
