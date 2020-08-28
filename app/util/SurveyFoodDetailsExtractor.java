@@ -26,7 +26,14 @@ public class SurveyFoodDetailsExtractor extends NonBrandedFoodDetailsExtractor i
             String servingText = portionObj.getString("portionDescription");
             if("Quantity not specified".equals(servingText)) continue;
             int firstSpaceIndex = servingText.indexOf(' ');
-            double quantity = Double.parseDouble(servingText.substring(0, firstSpaceIndex));
+            double quantity;
+            try {
+                quantity = Double.parseDouble(servingText.substring(0, firstSpaceIndex));
+            } catch(NumberFormatException nfe) {
+                // We end up here if the serving text is an english description rather than a numberic
+                // serving size. We'll just skip this serving size.
+                continue;
+            }
             String label = StringUtil.formatServingSizeLabel(servingText.substring(firstSpaceIndex + 1));
             double perUnitGramWeight = portionObj.getDouble("gramWeight") / quantity;
             // Nutrient information is provided per-100 grams, so ratio is compared to this standard.
